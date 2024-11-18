@@ -1,0 +1,213 @@
+---
+description: >-
+  This is the reference guide on the ObjectBox Generator, a build-time tool for
+  ObjectBox.
+---
+
+# Generator
+
+{% hint style="info" %}
+For an intro to the generator, see also the [installation guide](installation.md#objectbox-generator) and [Generating Binding Code](getting-started.md#generating-binding-code).
+{% endhint %}
+
+When using ObjectBox within your project, you typically need two things: the runtime library and the the build-time ObjectBox Generator. The generator takes a data model (see [Entity Annotations](entity-annotations.md)) as input and generates `struct`s, a data model representation as code and additional glue code for a tight and fast integration of your individual data types and the ObjectBox API.
+
+If you are using CMake, it's highly recommended to use the CMake integration of the ObjectBox Generator. For all other setups, triggering the generator in [standalone mode](generator.md#standalone) is also supported.
+
+{% hint style="info" %}
+The ObjectBox Generator binary is currently not available for Linux/Windows ARM architectures (pull requests are welcome). The macOS as universal binary supports ARM64 and AMD64 architectures.
+{% endhint %}
+
+## CMake Integration
+
+The ObjectBox Generator is well integrated into CMake.&#x20;
+
+Enabling the Generator via CMake
+
+Once you have the ObjectBox runtime library set up via `FetchContent` (see [installation](installation.md)), it only takes one more command to enable the Generator:
+
+```cmake
+# Note: downloads automatically if not found locally
+find_package(ObjectBoxGenerator 4.0.0 REQUIRED)
+```
+
+With that, the CMake funciton add\_obx\_schema is now available (see next section).
+
+### Add the schema with `add_obx_schema`
+
+This function “adds” ObjectBox schema files (.fbs) to a C++ CMake target. This implies generating a C++ source and header file for each given schema file. On a CMake level, the C++ sources are added to the CMake target and a dependency to the schema file is registered.
+
+```cmake
+add_obx_schema(
+  TARGET <target>
+  SCHEMA_FILES <schemafile>..
+  [INSOURCE]
+  [OUTPUT_DIR <path>]
+  [OUTPUT_DIR_HEADERS <path>]
+  [OUTPUT_DIR_MODEL_JSON <path>]
+  [CXX_STANDARD 11|14]
+  [EXTRA_OPTIONS <options>..]
+)
+
+```
+
+#### add\_obx\_schema: Options
+
+Note: The parameters `TARGET` and `SCHEMA_FILES` are required.
+
+**`TARGET`** specifies the CMake target to which the generated sources shall be assigned to.
+
+**`SCHEMA_FILES`** takes one or multiple ObjectBox schema file(s). A schema file is the input for the ObjectBox Generator and defines classes and their members. For details on the schema file please refer to the documentation. Schema files have the pattern `<name>.fbs`. For each schema file, the generator creates a C++ source and header file using the pattern `<name>.obx.cpp` and `<name>.obx.hpp`, respectively. (Also, two model files are generated: objectbox-model.h and a objectbox-model.json.)
+
+The option **`INSOURCE`** tells the generator to place all generated files in the source tree (directory). Note, that by default, the generator writes the generated C/C++ sources to the CMake build dir. It’s often preferable to use INSOURCE, as it can have several advantages:
+
+* It makes the generated sources more “visible” to developers.
+* It allows checking in generated sources to version control.
+* It does not require a generator setup for consumers, e.g. after checkout.
+
+One caveat with `INSOURCE` is that a cmake clean (`cmake –target clean`) also deletes the generated in-source files. This may change with a later version.
+
+**`OUTPUT_DIR`** specifies the location for auto-generated files in the source tree (default: current source directory). For in-source (`INSOURCE`) builds, this affects all generated files. For out-of-source builds, it only affects the `objectbox-model.json` file, because must be be kept in-source. The given directory can be relative to current source directory or can be given as absolute path.
+
+**`OUTPUT_DIR_HEADERS`** sets the output directory for generated header files for `INSOURCE` builds. It can be used alongside `OUTPUT_DIR` and then “overwrites” the directory for headers (only). Note that for in-source builds, the configured include-directories for the target are not changed. Thus, you need to specify the paths in the include statements, or add the include directory manually. (Out-of-source builds add the internally used directory for headers as an include directory to the target.)
+
+The option **`OUTPUT_DIR_MODEL_JSON`** specifies the location of the generated `objectbox-model.json` file. It defaults to current source directory, or `OUTPUT_DIR` if it is given. This generated file must be maintained under version source control since it is essential maintain database schema changes over time.
+
+Supply the option **`CXX_STANDARD`** to generate sources complying to a lower C++ standard, i.e. `11` for C++11. By default, and when `14` is given, the generator creates sources compatible with C++14 and higher versions.
+
+The option **`EXTRA_OPTIONS`** may pass additional arguments directly to the code generator executable (e.g. “`-empty-string-as-null -optional std::shared_ptr`”)
+
+#### Out-of-source configuration
+
+By default, generated files (except the model JSON file) are written relative to the current binary (build) directory. Generated headers and sources are written to the sub-directories `ObjectBoxGenerator-include` and `ObjectBoxGenerator-src`, respectively.
+
+### Details on finding the CMake module
+
+The CMake module is implicitly downloaded together with objectbox shared libraries as described in [Installation](installation.md).\
+\
+The latest version of the find module is also available from [https://raw.githubusercontent.com/objectbox/objectbox-generator/main/cmake/FindObjectBoxGenerator.cmake](https://raw.githubusercontent.com/objectbox/objectbox-generator/main/cmake/FindObjectBoxGenerator.cmake)
+
+{% hint style="info" %}
+Automatic download of ObjectBox-Generator executables can be disabled via CMake Option `OBX_GENERATOR_ALLOW_FETCH` set to `FALSE`.
+{% endhint %}
+
+The generator repository provides a CMake find module for `find_package` .
+
+This find module automatically locates a local installation of the executable `objectbox-generator` and checks it against the requested version. In addition, it can automatically download a version into the build directory. Automatic download is enabled by default via the option `OBX_GENERATOR_ALLOW_FETCH`. To turn this behaviour off, run cmake configure with e.g. `cmake -DOBX_GENERATOR_ALLOW_FETCH=OFF ..`.
+
+Currently supported platforms are Linux/x86-64, macOS and Windows/x86-64.
+
+```cmake
+find_package(ObjectBoxGenerator 4.0.0 REQUIRED)Variables
+```
+
+The following variables are defined by this module:
+
+*   `ObjectBoxGenerator_FOUND`
+
+    Whether objectbox-generator was successfully found.
+*   `ObjectBoxGenerator_EXECUTABLE`
+
+    If found, this variable comprises the full path to executable.
+*   `ObjectBoxGenerator_VERSION`
+
+    The full version string of the used ObjectBox Generator executable, e.g. “4.0.0” or “4.0.0-alpha2”.
+*   `ObjectBoxGenerator_VERSION_MAJOR`\
+    `ObjectBoxGenerator_VERSION_MINOR`\
+    `ObjectBoxGenerator_VERSION_PATCH`
+
+    The major, minor and patch version parts of the used ObjectBox Generator executable.
+
+## Using the Standalone Generator
+
+ObjectBox Generator can be downloaded as an executable (or build from GitHub). To trigger the generator, you simply run it using CLI parameters.
+
+### C and C++ Standard compliance
+
+To generate for plain C, use the `-c` switch. The C++ default output mode (using option switch `-cpp`) generates code targeting C++14 or higher. If you need to generate C++11 compliant code use `-cpp11` instead.  &#x20;
+
+### C++ Advanced Options
+
+* `-empty-string-as-null`: Empty strings are treated as null values in flatbuffers binary representation.
+* `-nan-as-null:` NaN (Not-A-Number) float32/float64 values are treated as null values in flatbuffers binary representation.
+* `-optional std::optional|std::unique_ptr|std::shared_ptr`: C++ wrapper type to use for fields annotated with `optional` .
+
+### Embedded `flatc` compiler
+
+The ObjectBox Generator is distributed as self-contained portable binary for Linux, Windows and macOS platforms, written in Go. \
+As a goodie it encapsulates a fully functional `flatc` compiler for generic flatbuffers tooling -   comprising over a dozen language bindings. Use the compiler by providing `FLATC` as first option, passing the rest of arguments to the embedded `flatc`:
+
+```
+objectbox-generator FLATC <flat arguments>
+```
+
+See all available options via `objectbox-generator FLATC --help`
+
+Example generic flatbuffers usage:
+
+```sh
+objectbox-generator FLATC --cpp --rust monster.fbs
+```
+
+### Help command
+
+Run `./objectbox-generator --help` for a list of current CLI parameters. The output looks something like this:
+
+```
+Usage:
+  objectbox-generator [flags] {path}
+      * to execute "clean" action (see below) on the path, removing previously generated code and missing entities,
+      * and execute code generation on the path afterwards.
+
+      The given {path} can be one of the following:
+        * a directory - a non-recursive clean and generation is performed on the given directory,
+        * a glob path pattern (e.g. contains a "*") - performs clean and generation on the matching paths,
+        * a Go-style path pattern (e.g. "./..." - a recursive match of the current dir) - performs clean and generation on the matching paths,
+
+
+or
+  objectbox-generator [flags] {model/file/path.fbs}
+      to generate the binding code for a single file
+
+
+or
+  objectbox-generator [flags] clean {path}
+      to remove the generated files instead of creating them - this removes *.obx.* and objectbox-model.h but keeps objectbox-model.json
+
+or
+  objectbox-generator FLATC [flatc arguments]
+      to execute FlatBuffers flatc command line tool Any arguments after the FLATC keyword are passed through.
+
+path:
+  * a source file path or a valid path pattern (e.g. ./...)
+  
+Available flags:
+  -c    generate plain C code
+  -cpp
+        generate C++ code (at least C++14)
+  -cpp11
+        generate C++11 code
+  -empty-string-as-null
+        C++: empty strings are treated as 0 (null)
+  -go
+        generate Go code
+  -help
+        print this help
+  -model string
+        path to the model information persistence file (JSON)
+  -nan-as-null
+        C++: NaNs are treated as 0 (null)
+  -optional string
+        C++ wrapper type to use for fields annotated "optional"; one of: std::optional, std::unique_ptr, std::shared_ptr
+  -out string
+        output path for generated source files
+  -out-headers string
+        optional: output path for generated header files
+  -persist string
+        [DEPRECATED, use 'model'] path to the model information persistence file (JSON)
+  -version
+        print the generator version info
+m
+
+
+```

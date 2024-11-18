@@ -1,0 +1,160 @@
+---
+description: >-
+  The ObjectBox C / C++ database comes with automatic schema migration. Learn
+  all about it here.
+---
+
+# Schema Changes
+
+ObjectBox manages its data model (schema) mostly automatically. The data model is defined by the Entities you define in FlatBuffer schema files. When you **add or remove** entities or properties of your entities, **ObjectBox takes care** of those changes when you launch `objectbox-generator` on the changed `.fbs` file without any further action needed from you.
+
+For other changes like **renaming or changing the type**, ObjectBox needs **extra information** to make things unambiguous. This works using unique identifiers (UIDs) specified by the [uid annotation](entity-annotations.md#supported-annotations), as we will see below.
+
+## Renaming Entities and Properties <a href="#renaming-entities-and-properties" id="renaming-entities-and-properties"></a>
+
+So why do we need that UID annotation? If you simply rename an entity, ObjectBox only sees that the old entity is gone and a new entity is available. This can be interpreted in two ways:
+
+* The old entity is removed and a new entity should be added, the old data is discarded. This is the **default behavior** of ObjectBox.
+* The entity was renamed, the old data should be re-used.
+
+So to tell ObjectBox to do a rename instead of discarding your old entity and data, you need to make sure it knows that this is the same entity and not a new one. You do that by attaching the internal UID to the entity. The same applies when renaming properties. We'll show an example for both an entity and a property rename.
+
+&#x20;**Step 1:** Add an empty `objectbox:uid` annotation to the entity/property you want to rename:
+
+{% code title="schema.fbs" %}
+```
+/// objectbox:uid
+table OldEntityName {
+    id: ulong;
+}
+
+table Task {
+    id: ulong;
+    /// objectbox:uid
+    old_property_name: string;
+}
+```
+{% endcode %}
+
+&#x20;**Step 2:** Re-generate ObjectBox code for the file using `objectbox-generator [-c|-cpp] schema.fbs`. The generation will fail with an error message that gives you the current UID of the entity/property:
+
+{% code title="output for empty "uid" annotation on an entity" %}
+```
+can't merge model information: entity OldEntityName: uid annotation value must 
+not be empty (model entity UID = 8427767268318374108) on entity OldEntityName
+```
+{% endcode %}
+
+{% code title="output for empty "uid" annotation on a property" %}
+```
+can't merge model information: merging entity Task: property old_property_name: 
+uid annotation value must not be empty:
+    [rename] apply the current UID 7671517997700696229
+    [change/reset] apply a new UID 2346823240790844685
+```
+{% endcode %}
+
+{% hint style="info" %}
+Note how for a property, the output is slightly different. It's because you have two options, either renaming the property or resetting (clearing) it's stored data. See [Reset data - new UID on a property](schema-changes.md#reset-data-new-uid-on-a-property) for more details.
+{% endhint %}
+
+&#x20;**Step 3:** Apply the UID printed in the error message to your entity/property:
+
+```go
+/// objectbox: uid=8427767268318374108
+table OldEntityName {
+    id: ulong;
+}
+
+table Task {
+    id: ulong;
+    /// objectbox:uid=7671517997700696229
+    old_property_name: string;
+}
+```
+
+&#x20;**Step 4:** The last thing to do is the actual rename on the language level:
+
+```go
+/// objectbox: uid=8427767268318374108
+table RenamedEntity {
+    id: ulong;
+}
+
+table Task {
+    id: ulong;
+    /// objectbox:uid=7671517997700696229
+    renamed_property: string;
+}
+```
+
+&#x20;You can now use your renamed entity/property as expected and all existing data will still be there.
+
+Note: Instead of the above you can also find the UID of the entity/property in the `objectbox-model.json` file yourself and add it as a value of the `uid` annotation when renaming your entity/property to achieve the same effect.
+
+## Changing Property Types
+
+{% hint style="warning" %}
+ObjectBox does not support migrating existing property data to a new type. You will have to take care of this yourself, e.g. by keeping the old property and adding some migration logic.
+{% endhint %}
+
+### **N**ew property, different name
+
+It's just adding an additional property - this solution useful if you need to do the data migration manually or just want to keep the old data around.
+
+```go
+table Task {
+    id: ulong;
+    old_property: string;
+}
+
+// becomes
+
+table Task {
+    id: ulong;
+    old_property: string;
+    new_property: int;
+}
+
+// Note, if the property already had an UID annotation, 
+//  don't add the same UID to the new property - skip the annotation instead.
+```
+
+### **Reset data - new UID on a property**
+
+This solution useful if you don't care about the original data at all = **it will be lost**.
+
+&#x20;**Step 1:** Add an empty \`objectbox:"uid"\` annotation to the property you want to reset:
+
+```go
+table Task {
+    id: ulong;
+    /// objectbox:uid
+    text: string;
+}
+```
+
+&#x20;**Step 2:** Re-generate ObjectBox code for the project using `go generate ./...` in your project directory. The generation will fail with an error message that gives you the current UID of the property:
+
+```
+can't merge model information: merging entity Task: property text: 
+uid annotation value must not be empty:
+    [rename] apply the current UID 7671517997700696229
+    [change/reset] apply a new UID 2346823240790844685
+```
+
+&#x20;**Step 3:** Apply the UID printed in the error message to your property (and change its type):
+
+```go
+table Task {
+    id: ulong;
+    /// objectbox: uid=2346823240790844685
+    text: string;
+}
+```
+
+You can now use the property in your entity as if it was a new one (no data stored)
+
+{% hint style="warning" %}
+The original property data isn't really removed right away on old stored objects but will be empty when read from DB and overwritten (thus finally lost) next time an object is written.
+{% endhint %}

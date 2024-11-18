@@ -1,0 +1,17 @@
+---
+description: Frequently asked questions about ObjectBox C and C++.
+---
+
+# FAQ
+
+## How do I distribute ObjectBox?
+
+Don't forget to bundle the dynamic library (so/dylib/dll) with your program when distributing/packaging for a installer. Having the library in the same directory as your program binary should be enough for Windows. For other system, you might need to ensure the installation library to the system directory (`usr/lib` or `/usr/local/lib`) or one of the paths specified in`LD_LIBRARY_PATH`(Linux) or`DYLD_LIBRARY_PATH`(macOS).
+
+## How to increase the maximum database size (by default 1 GB)?
+
+Symptoms: error messages like "Could not put", "Storage error(code -30792)" indicate that the database has reached a maximum. Using a maximum will prevent using up all disk space (and potentially rendering the system unusable), e.g. by faulty code.
+
+The 1 GB limit is a default, which can be changed via options. In C++ there's an `Option` class for that and in C there are `obx_opt_*()` functions. These options have to be prepared before opening the store.
+
+To increase the DB limit, use [`obx::Options::maxDbSizeInKb(uint64_t sizeInKb)`](https://objectbox.io/docfiles/c/current/classobx\_1\_1Options.html#a1e18dbe2cc14998827b265dcc2956994) in C++. For C, it's [`obx_opt_max_db_size_in_kb(OBX_store_options *opt, uint64_t size_in_kb)`](https://objectbox.io/docfiles/c/current/group\_\_c.html#ga1a334d11e5a989ae3195c56a5bf0a3ea).

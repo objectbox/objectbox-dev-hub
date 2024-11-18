@@ -1,1 +1,202 @@
-Dummy for GitBook Sync
+---
+description: >-
+  This is the ObjectBox documentation for our C and C++ APIs. We strive to
+  provide you with the easiest and fastest solution to store and retrieve data.
+---
+
+# ObjectBox C / C++ Database
+
+{% hint style="info" %}
+Jobs: We're looking for a [C++ Developer](https://objectbox.io/jobs/objectbox-senior-c-plusplus-developer/) with a ❤️ for performant code
+{% endhint %}
+
+Are you ready use ObjectBox? These two pages will get you up to speed:
+
+{% content-ref url="installation.md" %}
+[installation.md](installation.md)
+{% endcontent-ref %}
+
+{% content-ref url="getting-started.md" %}
+[getting-started.md](getting-started.md)
+{% endcontent-ref %}
+
+Alternatively, you can also dive into [some examples on GitHub](https://github.com/objectbox/objectbox-c/tree/main/examples) right away.
+
+Your opinion matters to us! To make ObjectBox better for our users, we have set up an [Anonymous Feedback Form](https://forms.gle/bdktGBUmL4m48ruj7). Please do fill this in (it only takes 2 minutes). Every response is highly appreciated. To rate this documentation, you can use the "Was this page helpful?" smiley at the end of each page.
+
+Otherwise, feel free to open an issue on [GitHub ](https://github.com/objectbox/objectbox-c/issues)or send us your comments to contact\[at]objectbox.io - Thank you! - and if you like what you see, we also appreciate a shoutout :)&#x20;
+
+## Latest Versions (Changelogs)
+
+<div align="left">
+
+<img src="https://img.shields.io/github/v/release/objectbox/objectbox-c?style=for-the-badge" alt="">
+
+</div>
+
+### 4.0 (2024-11-11)
+
+Note: 4.0.3 the first 4.0.x version working with ObjectBox Generator 4.0 and thus is the first full 4.0 release. For individual changes in the runtime library check the GitHub release notes: [4.0.0](https://github.com/objectbox/objectbox-c/releases/tag/v4.0.0), [4.0.1](https://github.com/objectbox/objectbox-c/releases/tag/v4.0.1) and [4.0.2](https://github.com/objectbox/objectbox-c/releases/tag/v4.0.2).
+
+* CMake stubs to easily integrate with [ObjectBox Generator 4.0](https://github.com/objectbox/objectbox-generator/releases/tag/v4.0.0)
+* ObjectBox now supports vector search ("vector database") to enable efficient similarity searches.\
+  This is particularly useful for AI/ML/RAG applications, e.g. image, audio, or text similarity.\
+  Other use cases include semantic search or recommendation engines.\
+  See [https://docs.objectbox.io/ann-vector-search](https://docs.objectbox.io/ann-vector-search) for details.
+* Adjusting the version number to match the core version (4.0); we will be aligning on major versions from now on.
+* Made closing the store more robust; e.g. it waits for ongoing queries and transactions to finish\
+  (please still ensure to clean up properly on your side, this is an additional safety net)
+* Made Box API more robust when racing against store closing
+* Add "vectorsearch-cities" example
+
+### 0.21.0 (2024-02-13)
+
+* In-memory databases (simply provide a "memory:" prefixed "directory")
+
+#### Sync:
+
+* New client/server statistics API
+* New server API to enable authenticators
+* Sync server: support for sync permissions, blocks client updates with no write permission
+* Added sync-level login/write permissions for Admin Users DB and Web-UI
+* New authenticator "ObjectBox Admin" with support for authorization
+* New client API for username/password credentials
+* New client-side error listener API; initially reports "receive-only" downgrade due to no write permissions.
+
+### 0.20.0 (2023-12-11)
+
+* Added OBXFeature\_Backup to query for the feature's availability
+* Internal: added a DB store abstraction layer (another announcement about this will follow)
+* Tree API: fix for meta IDs vs. IDs
+* Various internal improvements
+
+#### Sync
+
+* Sync clients may now supply multiple URLs; for each connection attempt a random one is chosen. This allows for client-side load balancing and failover with an ObjectBox Sync cluster.
+
+### 0.19.0 (2023-09-04)
+
+* New K/V validation option on opening the store
+* Additions cursor API: get current ID, ID-based seeks (seek to first ID, seek to next ID)
+* Support scalar vector types with basic queries (APIs only, no generator support)
+* Various tree API improvements, e.g. introspection
+* Minor API clean up: e.g. using int types for bit flags not enums
+* Fixes query link condition in combination with some "or" conditions
+* Fixes query "less" condition for case-sensitive strings with value indexes (default is hashed index)
+* Updated Linux toolchain; now requires glibc 2.28 or higher (and GLIBCXX\_3.4.25); e.g. the following minium versions are fine: Debian Buster 10 (2019), Ubuntu 20.04, RHEL 8 (2019)
+* Various internal improvements
+* Sync: various additions and improvements (client and server)
+
+### 0.18.1 (2023-01-30)
+
+Recommended bugfix release; please update.
+
+* Fixes "Could not put (-30786)", which may occur in some corner cases on some platforms.
+
+### 0.18.0 (2022-10-31)
+
+* Date properties can now be tagged as expiration time; which can be then be easily evicted
+* Tree API: various additions and improvements, e.g. OBXTreeOptionFlags to configure the tree behavior
+* New query condition to match objects that have a given number of relations
+* New "max data size" store setting
+* Enabled stricter compiler settings
+* Added stacktraces on errors (Linux only; very lightweight as it uses external addr2line or llvm-symbolizer)
+* Added log callback for most important logs
+* Consolidated "user data" passing as the last parameter
+* Various internal improvements
+
+#### C++
+
+* Added BoxTypeless, QueryBuilderBase and QueryBase: these can be used without generated code and template types.
+* New APIs to get the schema IDs for entity types and properties
+* Added two methods to Store to await asynchronous processing
+* Added "internal" namespace so that internal members do not spill into the obx namespace
+* Move more implementations to OBX\_CPP\_FILE
+
+#### Sync
+
+* Custom protocols for Sync: plugin your own messaging protocol, which ObjectBox Sync will run on
+* Improvements to run Sync Server with limited disk space (e.g. on small devices)
+* Tree Sync improvements; e.g. consolidate conflicts
+* WebSockets (sync protocol) is now a feature, which can be turned off (special build version)
+* Performance optimizations
+
+### 0.17.0 (2022-06-15)
+
+* Added a "weak store" API providing weak reference for stores (typically used by background threads)
+* Added Store ID API, e.g. getting a store by its ID
+* Various internal improvements including minor optimizations for binary size and performance
+
+#### C++
+
+* New "OBX\_CPP\_FILE" define to place declarations in a single .cpp/.cc file: improves compilation time and results
+* New "Exception" base class for all thrown exceptions
+* Various internal improvements, e.g. a "internal" namespace to better distinguish from userland API
+
+### 0.16.0 (2022-05-06)
+
+* Allow UTF-8 for database directories on Windows (available for other platforms before)
+* Various internal improvements
+
+#### C++
+
+* Promoted `Options` to a top level class, as nested classes cannot be declared forward
+* New `#define` to disable FlatBuffers includes to simplify new project setup
+* Rename `Exception` to `DbException`
+* Minor improvements
+
+### V0.15.2 (2022-02-15)
+
+* Add store cloning
+* Fix attaching to a reopened store
+
+### V0.15.1 (2022-01-26)
+
+* Fix non-unique indexes triggering unique constraint violations in corner cases (requires at least two unique constraints in an entity and a specific order; introduced in 0.15.0)
+* Admin UI now supports multiple sessions to the same host using different ports (session ID via HTTP request)
+* Minor performance improvements with hashed indexes
+
+#### Sync
+
+* Performance improvements for compression and decompression
+
+### V0.15.0 (2021-12-09)
+
+* New "Flex" data type that can contain data of various types like integers, floating points, strings, lists and maps
+* New query conditions for Flex lists to find a specific element
+* New query conditions for Flex maps to find elements with a specific key or key/value pair
+* New unique on-conflict strategy: replace conflicting objects (OBXPropertyFlags\_UNIQUE\_ON\_CONFLICT\_REPLACE)
+* New functions to attach to existing stores using only the file path (in the same process)
+* New APIs for ObjectBox Admin, the web based UI (formerly known as Object Browser): obx\_admin\_\*
+* Minor performance improvements for indexed access
+* Major performance improvements for tree/GraphQL queries
+* ARM binaries are now built for minimal size reducing the library size significantly
+* New "no\_reader\_thread\_locals" store option
+* Enable debug logging (requires a special build)
+* API: Type for query offsets and limits was changed from uint64\_t to size\_t
+* API: rarely used obx\_txn\_mark\_success() was removed; use obx\_txn\_success()
+* API: feature checks consolidated to only use obx\_has\_feature()
+* Many internal improvements
+* Core version 3.0.1-2021-12-09
+
+#### Sync
+
+* New API for embedded server mode: obx\_sync\_server\_\* (implementation available on request)
+
+### Earlier Versions
+
+The changelogs of earlier versions are available as part of the [GitHub releases](https://github.com/objectbox/objectbox-c/releases).
+
+Provides native dynamic/shared library (.so/.dylib/.dll)
+
+* Provides C & C++ headers (objectbox.h & objectbox.hpp)
+
+## ObjectBox Generator
+
+<div align="left">
+
+<img src="https://img.shields.io/github/v/release/objectbox/objectbox-generator?style=for-the-badge" alt="">
+
+</div>
+
+Check the [ObjectBox Generator](https://github.com/objectbox/objectbox-generator/releases) releases for details.

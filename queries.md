@@ -1,0 +1,225 @@
+---
+description: >-
+  You can query the ObjectBox C / C++ database for objects by specifying
+  criteria with the Query builder. It is easy, learn how to do it here.
+---
+
+# Queries
+
+ObjectBox queries return persisted objects that match user-defined criteria. You use QueryBuilder to specify criteria and create a Query which actually executes the query and returns matching objects.&#x20;
+
+## Building queries
+
+The `QueryBuilder<T>/OBX_query_builder` class lets you build custom queries for your entities. Create an instance via `box.query()` (C++) or `obx_query_builder()` (C).&#x20;
+
+The generated code contains entity and property meta-information in an `enum` (C) or a `struct` (C++). These provide a way to define query conditions safely, without literal entity and property IDs spread throughout the code. Let's have a look at a fragment of the generated code for a `User` entity (its unique Entity ID is `6` and it has three properties: `id`, `name` `surname`) and the examples below.
+
+{% tabs %}
+{% tab title="C++" %}
+```cpp
+struct User_ {
+    static constexpr obx_schema_id entityId() { return 6; }
+    
+    static const obx::Property<User, OBXPropertyType_Long> id;
+    static const obx::Property<User, OBXPropertyType_String> name;
+    static const obx::Property<User, OBXPropertyType_String> surname;
+};
+```
+{% endtab %}
+
+{% tab title="C" %}
+```c
+enum User_ {
+    User_ENTITY_ID = 6,
+    
+    User_PROP_ID_id = 1,
+    User_PROP_ID_name = 2,
+    User_PROP_ID_surname = 3,
+};
+```
+{% endtab %}
+{% endtabs %}
+
+Here's how we could query for all users with the first name “Joe” (case insensitive) and their surname starting with a capital "O". First, we initialize the QueryBuilder, next we add one or more conditions (combined with AND operator by default), then we `build` the query and finally execute it using `find`.
+
+{% tabs %}
+{% tab title="C++" %}
+```cpp
+QueryBuilder<User> qb = box.query(
+        User_::name.equals("Joe", false) && User_::surname.startsWith("O")
+        );
+Query<User> query = qb.build();
+std::vector<std::unique_ptr<User>> joes = query.find();
+```
+{% endtab %}
+
+{% tab title="C" %}
+```cpp
+OBX_query_builder* qb = obx_query_builder(store, User_ENTITY_ID);
+obx_qb_string_equal(qb, User_PROP_ID_name, "Joe", false);
+obx_qb_string_starts_with(qb, User_PROP_ID_surname, "O", true);
+OBX_query* query = obx_query(qb);
+OBX_bytes_array* bytes_array = obx_query_find(query, 0, 0);
+
+... flatbuffers deserialization
+```
+
+{% hint style="info" %}
+`obx_query_find()` needs to be executed inside an explicit read transaction to avoid data copy while preserving its validity (so that concurrent threads won't change the data while you read it). We're omitting this in the examples to keep them simple, see [Transactions](transactions.md#read-transactions) for more details.
+{% endhint %}
+{% endtab %}
+{% endtabs %}
+
+## Reusing queries and parameters
+
+If you frequently run a `Query` you should cache the `Query` object and re-use it. To make a `Query` more reusable you can change the values, or query parameters, of each condition you added even after the `Query` is built. Let's see how.
+
+Assume we want to find a list of `User` with specific `name` values. First, we build a regular `Query` with an `equal` condition for `name`. Because we have to pass an initial parameter value to `equal()` but plan to override it before running the `Query` later, we just pass an empty string:
+
+{% tabs %}
+{% tab title="C++" %}
+```cpp
+Query<User> query = box.query(User::name.equals("")).build();
+```
+{% endtab %}
+
+{% tab title="C" %}
+```cpp
+obx_qb_string_equal(qb, User_PROP_ID_name, "", true);
+...
+OBX_query* query = obx_query(qb);
+```
+{% endtab %}
+{% endtabs %}
+
+Now at some later point, we want to actually run the `Query`. To set a value for the `name` parameter on the `Query` and pass the `name` property and the new parameter value:
+
+{% tabs %}
+{% tab title="C++" %}
+```cpp
+// Change name param to "Joe", get results
+auto joes = query.setParameter(User_::name, "Joe").find();
+
+...
+
+// Change name param to "Jake", get results
+// Note: setting a parameter updates the query object so no need to do it inline
+query.setParameter(User_::name, "Jake"); 
+auto jakes = query.find();
+```
+{% endtab %}
+
+{% tab title="C" %}
+```cpp
+// Change name param to "Joe", get results
+obx_query_string_param(query, User_ENTITY_ID, User_PROP_ID_name, "Joe")
+// call obx_query_find(query, 0, 0); and read data from flatbuffers
+
+...
+
+// Change name param to "Jake", get results
+obx_query_string_param(query, User_ENTITY_ID, User_PROP_ID_name, "Jake")
+// call obx_query_find(query, 0, 0); and read data from flatbuffers
+```
+{% endtab %}
+{% endtabs %}
+
+### Aliases
+
+So you might already be wondering, what happens if you have more than one condition using the same property? For this purpose, you can **assign each condition an alias** by calling `Alias()` right after specifying the condition:
+
+{% tabs %}
+{% tab title="C++" %}
+```cpp
+obx_qb_int_greater(qb.cPtr(), User_::age, 0);
+obx_qb_param_alias(qb.cPtr(), "min age");
+obx_qb_int_less(qb.cPtr(), User_::age, 0);
+obx_qb_param_alias(qb.cPtr(), "max age");
+```
+{% endtab %}
+
+{% tab title="C" %}
+```c
+obx_qb_int_greater(qb, User_PROP_ID_age, 0);
+obx_qb_param_alias(qb, "min age");
+obx_qb_int_less(qb, User_PROP_ID_age, 0);
+obx_qb_param_alias(qb, "max age");
+```
+{% endtab %}
+{% endtabs %}
+
+Then you'll pass the alias when setting a new parameter value:
+
+{% tabs %}
+{% tab title="C++" %}
+```cpp
+obx_query_int_param_alias(query.cPtr(), "min age", 50);
+obx_query_int_param_alias(query.cPtr(), "max age", 100);
+```
+{% endtab %}
+
+{% tab title="C" %}
+```c
+obx_query_int_param_alias(query, "min age", 50);
+obx_query_int_param_alias(query, "max age", 100);
+```
+{% endtab %}
+{% endtabs %}
+
+## Limit, Offset, and Pagination
+
+Sometimes you only need a subset of a query, for example, the first 10 elements. This is especially helpful (and frugal) when you have a high number of entities and you cannot limit the result using query conditions only. The built query has  `offset` and `limit` methods to help you do that.
+
+{% tabs %}
+{% tab title="C++" %}
+```cpp
+auto users = query.offset(10).limit(5).find();
+// users.size() <= 5
+
+// same result on later calls, offset and limit are persisted on the C++ query
+users = query.find(); 
+```
+{% endtab %}
+
+{% tab title="C" %}
+```
+uint64_t offset = 10;
+uint64_t limit = 5;
+OBX_bytes_array* bytes_array = obx_query_find(query, offset, limit);
+```
+{% endtab %}
+{% endtabs %}
+
+## Reading a single property
+
+If you only want to return the values of certain property and not a list of full objects you can use a PropertyQuery:
+
+{% tabs %}
+{% tab title="C++" %}
+```cpp
+Query<User> query = qb.build();
+OBX_query_prop* propQuery = obx_query_prop(query.cPtr(), User_::age);
+OBX_int64_array* ages = obx_query_prop_int64_find(propQuery, nullptr);
+```
+{% endtab %}
+
+{% tab title="C" %}
+```c
+OBX_query* query = obx_query(qb);
+OBX_query_prop* prop_query = obx_query_prop(query, User_PROP_ID_age);
+OBX_int64_array* ages = obx_query_prop_int64_find(prop_query, NULL);
+```
+{% endtab %}
+{% endtabs %}
+
+{% hint style="info" %}
+Note: the returned array of property values is **not in any particular order**, even if you did specify an order when building the query.
+{% endhint %}
+
+### Handling null values
+
+**By default, null values are not returned** (they're skipped)**.** However, you can specify a replacement value to return if a property is null as the second argument to `obx_query_prop_*_find()`.
+
+## Other query features
+
+There are many more features, such as property aggregate functions, distinct, removal of all data matching a query. Be sure to check out the `objectbox.h` and `objectbox.hpp` or API docs to discover more.

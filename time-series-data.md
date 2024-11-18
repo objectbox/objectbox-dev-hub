@@ -1,0 +1,67 @@
+---
+description: >-
+  ObjectBox TS is the ObjectBox database extended by time series data. Ingestion
+  of time based data and querying it is extremely optimized and efficient.
+---
+
+# Time Series Data
+
+[ObjectBox TS](https://objectbox.io/time-series-database/) stores time series data differently to optimize handling of time based data. Assuming you are already familiar with the standard ObjectBox database, here's how to work with time series data in a nutshell:
+
+* For a time series enabled type, you annotate a date property as an **ID companion**
+* **Standard queries** targeting the ID companion date property will perform much better automatically
+* There are a couple of special **APIs for time series** operations, e.g. a time based iterator over data
+
+{% hint style="info" %}
+Also check out the [ObjectBox TS example project ](https://github.com/objectbox/objectbox-ts-demo)on GitHub.
+{% endhint %}
+
+### Defining the Time Series type
+
+Assuming you are already working with ObjectBox Generator (see [getting started](getting-started.md)), you already know about FlatBuffer schema files and how to generate glue code to work conveniently with ObjectBox. Let's have a look at this simple definition file:
+
+{% code title="timeseries.fbs" %}
+```
+table SensorData {
+    id:ulong;
+
+    /// objectbox:id-companion, date-nano
+    time:long;
+
+    valueName:string;
+    
+    value:long;
+}
+```
+{% endcode %}
+
+The type `SensorData` allows capturing values which come with a timestamp (`time`) and a `name`. While this mostly a standard definition, pay special attention to the annotations on the `time` property: `objectbox:id-companion, date-nano` tells ObjectBox that this is a time series enabled type. Also note that we are using nanosecond resolution (specifying `date` instead of `date-nano` would result in millisecond resolution). OK, this is all it needs to get the generator started:
+
+```
+objectbox-generator -cpp timeseries.fbs
+```
+
+This will generate all code you need to get started with C++ and time series objects.
+
+### Working with Time Series data
+
+Time series data is inserted (put) like any other data:
+
+```
+obx::Box<Sensor> box(store);
+obx_id id = box.put({.valueName = "temperature", .value = 36});
+```
+
+Note that the `time` property is absent and thus is automatically assigned to the current time. Of course, you can initialize `time` beforehand if e.g. the sensor offers a timestamp. Also, you like in standard ObjectBox, we did not assign an ID as this is done for you.
+
+Internally, however, data is stored differently. Most importantly, there is no secondary index for the time property that has to be updated. The advantages of not requiring an secondary index are superior speed and less storage space.
+
+{% hint style="warning" %}
+Time series data do not allow updates to the time property. As time series data is usually "immutable", this is typically not an issue. If you must update an object's time, remove the object, set its ID to 0, set the new time and put it. This results in a new object with a new ID.
+{% endhint %}
+
+In many ways time series objects work like regular objects. You can get and remove them, or [query](queries.md) for them. The API stays the same.
+
+## Example Time Series project
+
+For a more complex working example, visit the official [ObjectBox TS C++ example project](https://github.com/objectbox/objectbox-ts-demo) on GitHub. It's a ready to go setup; all you need is the ObjectBox TS library (contact us).

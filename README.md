@@ -28,11 +28,18 @@ Otherwise, feel free to open an issue on [GitHub ](https://github.com/objectbox/
 
 ## Latest Versions (Changelogs)
 
-<div align="left">
+<div align="left"><img src="https://img.shields.io/github/v/release/objectbox/objectbox-c?style=for-the-badge" alt=""></div>
 
-<img src="https://img.shields.io/github/v/release/objectbox/objectbox-c?style=for-the-badge" alt="">
+### 4.1.0 (2025-01-28)
 
-</div>
+* New query conditions for map properties (via flex properties): now supports key/value pairs for inequality conditions (e.g. greater than, less than) for string, integer and floating point values
+* Vector search: add "Geo" distance type for longitude/latitude pairs
+* Various internal improvements
+
+#### Sync
+
+* Add JWT authentication
+* Sync clients can now send multiple credentials for login
 
 ### 4.0 (2024-11-11)
 
@@ -193,10 +200,6 @@ Provides native dynamic/shared library (.so/.dylib/.dll)
 
 ## ObjectBox Generator
 
-<div align="left">
-
-<img src="https://img.shields.io/github/v/release/objectbox/objectbox-generator?style=for-the-badge" alt="">
-
-</div>
+<div align="left"><img src="https://img.shields.io/github/v/release/objectbox/objectbox-generator?style=for-the-badge" alt=""></div>
 
 Check the [ObjectBox Generator](https://github.com/objectbox/objectbox-generator/releases) releases for details.

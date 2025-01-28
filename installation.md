@@ -24,7 +24,7 @@ include(FetchContent)
 FetchContent_Declare(
     objectbox
     GIT_REPOSITORY https://github.com/objectbox/objectbox-c.git
-    GIT_TAG        v4.0.3
+    GIT_TAG        v4.1.0
 )
 
 FetchContent_MakeAvailable(objectbox)
@@ -58,7 +58,7 @@ include(FetchContent)
 FetchContent_Declare(
     objectbox
     GIT_REPOSITORY https://github.com/objectbox/objectbox-c.git
-    GIT_TAG        v4.0.3
+    GIT_TAG        v4.1.0
 )
 
 FetchContent_GetProperties(objectbox)
@@ -104,7 +104,7 @@ Using the download.sh script (on Windows, use something like Git Bash to run it)
 
 Details on the download.sh script:
 
-* Creates a "download" directory and a version dependent sub directory named like "libobjectbox-0.1-some-hex-hash".
+* Creates a "download" directory and a version dependent sub directory named like "libobjectbox-4.1.0-some-hex-hash".
 * Inside the version dependent sub directory, you will find the directories "include" and "lib"/
 * The "lib" directory contains the binary library.
 * Gives you an option to install the library to `/usr/lib` (linux) or `/usr/local/lib` (macOS).

@@ -30,6 +30,12 @@ Otherwise, feel free to open an issue on [GitHub ](https://github.com/objectbox/
 
 <div align="left"><img src="https://img.shields.io/github/v/release/objectbox/objectbox-c?style=for-the-badge" alt=""></div>
 
+### 4.2.0 (2025-03-04)
+
+* Extended the model by external names and types: allows defining a different name for an external database, which ObjectBox syncs with.
+
+This prepares upcoming features for our [MongoDB Sync Connector](https://sync.objectbox.io/mongodb-sync-connector).
+
 ### 4.1.0 (2025-01-28)
 
 * New query conditions for map properties (via flex properties): now supports key/value pairs for inequality conditions (e.g. greater than, less than) for string, integer and floating point values

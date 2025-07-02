@@ -4,7 +4,15 @@ description: >-
   persist entities with entity annotations in this tutorial section.
 ---
 
+import Tabs from "@theme/Tabs"
+import TabItem from "@theme/TabItem"
+
+
+
 # Entity Annotations
+
+ObjectBox database persistence for C and C++ is based on objects. Learn how to persist entities with entity annotations in this tutorial section.
+
 
 The source FlatBuffer schema can contain some ObjectBox-specific annotations, declared as specially formatted comments to `table` and `field` FlatBuffer schema elements.&#x20;
 
@@ -12,8 +20,7 @@ The source FlatBuffer schema can contain some ObjectBox-specific annotations, de
 
 Have a look at the following FlatBuffers schema example showing some ObjectBox annotations:
 
-{% code title="schema.fbs" %}
-```
+```fbs title="schema.fbs"
 /// This entity is not annotated and serves as a relation target in this example
 table Simple {
     id:ulong;
@@ -48,7 +55,6 @@ table SharedInfo {
     ...
 }
 ```
-{% endcode %}
 
 ## Annotation format
 To ensure that the annotations are recognized, follow these guidelines:
@@ -66,7 +72,7 @@ The following annotations are currently supported:
 * **uid** - used to explicitly specify UID used with this entity; used when renaming entities. See [Schema changes](schema-changes.md) for more details.
 * **relation** - adds a standalone (many-to-many) relation, usually to another entity. Example: creating a relation to the authors of a book: `objectbox:relation(name=authors,to=Author)`
 * **sync** - enables synchronization for the entity - only relevant with [ObjectBox Sync](https://objectbox.io/sync/) library builds. Entities not marked with this annotation will not be synchronized to the server, i.e. they're local-only.
-  * `sync(sharedGlobalIds)` can be used to switch from the default behaviour (ID-mapping) to using a global ID space. This flag tells ObjectBox to treat object IDs globally and thus no ID mapping (local <-> global) is performed. Often this is used with `id(assignable)` annotation and some special ID scheme.
+  * `sync(sharedGlobalIds)` can be used to switch from the default behaviour (ID-mapping) to using a global ID space. This flag tells ObjectBox to treat object IDs globally and thus no ID mapping (local `<->` global) is performed. Often this is used with `id(assignable)` annotation and some special ID scheme.
 
 ### **Property annotations**
 

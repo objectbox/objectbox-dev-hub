@@ -1,0 +1,232 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #2e8555;
+  --ifm-color-primary-dark: #29784c;
+  --ifm-color-primary-darker: #277148;
+  --ifm-color-primary-darkest: #205d3b;
+  --ifm-color-primary-light: #33925d;
+  --ifm-color-primary-lighter: #359962;
+  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b4;
+  --ifm-color-primary-lightest: #4fddbf;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* =====================
+   Merged from custom-docusaurus-theme.css
+   ===================== */
+/**
+ * Updated ObjectBox Theme - With Final Tab Fixes
+ * Only essential design touches without interfering with core functionality
+ */
+
+/* ===== TEAL COLOR THEME ===== */
+:root {
+  /* Update primary colors to teal */
+  --ifm-color-primary: #17A6A6;
+  --ifm-color-primary-dark: #138a8a;
+  --ifm-color-primary-darker: #118080;
+  --ifm-color-primary-darkest: #0e6666;
+  --ifm-color-primary-light: #1bb8b8;
+  --ifm-color-primary-lighter: #1fc2c2;
+  --ifm-color-primary-lightest: #2dd4d4;
+  
+  /* Keep original code settings */
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  
+  /* Custom colors for consistent design */
+  --objectbox-grey-light: #F6F6F6;
+  --objectbox-grey-border: #DADFDF;
+  --objectbox-grey-text: #697070;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #17A6A6;
+  --ifm-color-primary-dark: #138a8a;
+  --ifm-color-primary-darker: #118080;
+  --ifm-color-primary-darkest: #0e6666;
+  --ifm-color-primary-light: #1bb8b8;
+  --ifm-color-primary-lighter: #1fc2c2;
+  --ifm-color-primary-lightest: #2dd4d4;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* ===== FINAL TAB STYLING ===== */
+/* Tab header container - light grey background for entire header area */
+.tabs {
+  background-color: var(--objectbox-grey-light) !important;
+  border-left: 1px solid var(--objectbox-grey-border) !important;
+  border-right: 1px solid var(--objectbox-grey-border) !important;
+  border-top: 1px solid var(--objectbox-grey-border) !important;
+  border-bottom: 1px solid var(--objectbox-grey-border) !important;
+  border-radius: 6px 6px 0 0 !important; /* Only top corners rounded */
+  margin: 0 0 0 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Tab content area */
+div[role="tabpanel"] {
+  border: 1px solid var(--objectbox-grey-border) !important;
+  /*border-top: none !important;*/
+  border-radius: 0 0 6px 6px !important;
+  background-color: white !important;
+  padding: 20px !important;
+  margin: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  position: relative;
+  z-index: 1;
+}
+
+
+.tabs__item {
+  background-color: var(--objectbox-grey-light) !important;
+  border-right: 1px solid var(--objectbox-grey-border) !important;
+  color: var(--objectbox-grey-text) !important;
+  font-weight: 400 !important;
+  padding: 10px 16px !important;
+  border-bottom: none !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-radius: 0 !important; /* NO rounded corners on any tabs */
+  margin: 0 !important; /* Remove any margin */
+}
+
+/* Remove all rounded corners from first tab and ensure no left gap */
+.tabs__item:first-child {
+  border-radius: 0 !important; /* Completely square */
+  margin-left: 0 !important; /* No left gap */
+}
+
+/* Last tab - remove right border and ensure no right gap */
+.tabs__item:last-child {
+  border-right: none !important;
+  margin-right: 0 !important; /* No right gap */
+}
+
+.tabs__item:hover {
+  color: var(--ifm-color-primary) !important;
+  background-color: var(--objectbox-grey-light) !important;
+}
+
+.tabs__item--active {
+  position: relative;
+  z-index: 2;
+  background-color: white !important;
+  color: var(--ifm-color-primary) !important;
+  font-weight: 500 !important;
+  border-bottom: none !important;
+}
+
+/* ===== CODE BLOCKS - PRESERVE DOCUSAURUS STYLING ===== */
+/* Only override background color for code blocks, preserve all other styling */
+div[role="tabpanel"] pre,
+div[role="tabpanel"] .prism-code {
+  background-color: var(--objectbox-grey-light) !important;
+  border: 1px solid var(--objectbox-grey-border) !important;
+  border-radius: 4px !important;
+}
+
+/* Ensure inline code gets grey background */
+div[role="tabpanel"] code:not(pre code) {
+  background-color: var(--objectbox-grey-light) !important;
+  border: 1px solid var(--objectbox-grey-border) !important;
+  padding: 2px 4px !important;
+  border-radius: 3px !important;
+}
+
+/* ===== SIDEBAR MENU - GREY INACTIVE TEXT ===== */
+.menu__link:not(.menu__link--active) {
+  color: var(--objectbox-grey-text) !important;
+}
+
+.menu__link--active {
+  color: var(--ifm-color-primary) !important;
+}
+
+/* ===== INFO BOXES ===== */
+/* Style for info admonitions */
+.admonition-info {
+  border-left: 3px solid #17A6A6 !important;
+  background-color: rgba(84, 199, 236, 0.05) !important;
+  border-radius: 0 4px 4px 0 !important;
+  padding-left: 15px !important; /* Add indentation */
+  margin-left: 20px !important; /* Adjust margin for overall indentation */
+}
+
+.admonition-info .admonition-heading h5 {
+  color: #17A6A6 !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 13px !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* ===== TIP BOXES WITH CHECKMARKS ===== */
+.admonition-tip .admonition-heading h5::before {
+  content: "✅ " !important;
+  margin-right: 6px !important;
+}
+
+.admonition-tip {
+  border-left: 3px solid var(--ifm-color-primary) !important;
+  background-color: rgba(23, 166, 166, 0.05) !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+.admonition-tip .admonition-heading h5 {
+  color: var(--ifm-color-primary) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 13px !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* ===== DARK MODE ADJUSTMENTS ===== */
+[data-theme='dark'] .tabs {
+  background-color: #2a2a2a !important;
+  border-color: #444 !important;
+}
+
+[data-theme='dark'] .tabs__item {
+  background-color: #2a2a2a !important;
+  border-color: #444 !important;
+  color: #aaa !important;
+}
+
+[data-theme='dark'] .tabs__item--active {
+  background-color: #1a1a1a !important;
+  color: var(--ifm-color-primary) !important;
+}
+
+[data-theme='dark'] div[role="tabpanel"] {
+  background-color: #1a1a1a !important;
+  border-color: #444 !important;
+}
+
+[data-theme='dark'] div[role="tabpanel"] pre,
+[data-theme='dark'] div[role="tabpanel"] .prism-code {
+  background-color: #2a2a2a !important;
+  border-color: #444 !important;
+}

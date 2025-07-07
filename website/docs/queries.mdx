@@ -78,7 +78,7 @@ OBX_bytes_array* bytes_array = obx_query_find(query, 0, 0);
 ```
 
 :::info
-`obx_query_find()` needs to be executed inside an explicit read transaction to avoid data copy while preserving its validity (so that concurrent threads won't change the data while you read it). We're omitting this in the examples to keep them simple, see [Transactions](transactions.md#read-transactions) for more details.
+`obx_query_find()` needs to be executed inside an explicit read transaction to avoid data copy while preserving its validity (so that concurrent threads won't change the data while you read it). We're omitting this in the examples to keep them simple, see [Transactions](transactions#read-transactions) for more details.
 :::
 
 </TabItem>
@@ -210,7 +210,7 @@ users = query.find();
 </TabItem>
 <TabItem value="c" label="C">
 
-```
+```c
 uint64_t offset = 10;
 uint64_t limit = 5;
 OBX_bytes_array* bytes_array = obx_query_find(query, offset, limit);

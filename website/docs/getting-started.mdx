@@ -18,7 +18,7 @@ ObjectBox Generator produces binding code for ObjectBox C & C++ APIs. This great
 ### Generating binding code
 
 :::info
-ObjectBox Generator is a tool, which must be [downloaded separately](https://github.com/objectbox/objectbox-generator/releases). For details, please check the [installation](installation.md) page.
+ObjectBox Generator is a tool, which must be [downloaded separately](https://github.com/objectbox/objectbox-generator/releases). For details, please check the [installation](installation) page.
 :::
 
 ObjectBox Generator uses FlatBuffer schema file (.fbs) as its primary input. The Generator also maintains some metadata around the data model in a JSON file (objectbox-model.json). Based on these two files, it generates code for the selected language (C or C++).&#x20;
@@ -52,7 +52,7 @@ The following files will be generated:
 * tasklist.obx.cpp
 
 :::info
-See [#cmake-support](generator.md#cmake-support "mention")for details on CMake integration.
+See [#cmake-support](generator#cmake-support "mention")for details on CMake integration.
 :::
 
 </TabItem>
@@ -233,7 +233,7 @@ handle_error:  // print error and clean up
 
 If you've followed the installation instructions, you should be able to compile the example
 
-If you are using CMake, like shown in the [installation section](installation.md#cmake-3.14),  just add the generated `tasklist.obx.cpp` file to the `myapp`  target.
+If you are using CMake, like shown in the [installation section](installation#cmake-3.14),  just add the generated `tasklist.obx.cpp` file to the `myapp`  target.
 
 The `add_executable` call in the CMake file now looks like this:
 
@@ -263,7 +263,7 @@ gcc main.c -I. -lobjectbox -lflatccrt
 </Tabs>
 
 :::info
-The command snippet assumes you have [the libraries installed](installation.md) in a path recognized by your OS (e.g. /usr/local/lib/) and all the referenced headers are in the same folder alongside the main.c/.cpp file.
+The command snippet assumes you have [the libraries installed](installation) in a path recognized by your OS (e.g. /usr/local/lib/) and all the referenced headers are in the same folder alongside the main.c/.cpp file.
 :::
 
 Wherever you have access to a Box, you can use it to persist objects and fetch objects from disk. **Boxes are thread-safe.** Here are some of the basic operations, have a look at the objectbox.h(pp) for more:

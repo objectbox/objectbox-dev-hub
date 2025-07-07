@@ -6,7 +6,7 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
+  --ifm-color-primary: #17A6A6;
   --ifm-color-primary-dark: #29784c;
   --ifm-color-primary-darker: #277148;
   --ifm-color-primary-darkest: #205d3b;
@@ -19,7 +19,7 @@
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary: #17A6A6;
   --ifm-color-primary-dark: #21af90;
   --ifm-color-primary-darker: #1fa588;
   --ifm-color-primary-darkest: #1a8870;
@@ -69,6 +69,97 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
+/* ===== NAVBAR STYLING ===== */
+
+.navbar {
+  padding: 1.5rem 0 !important;
+  min-height: 80px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+}
+
+/* LEFT BRAND - Keep normal styling */
+.navbar__brand {
+  margin-right: 3rem !important;
+}
+
+/* Make navbar title black (not teal) */
+.navbar__title {
+  color: #000 !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+/* Navbar title hover - teal */
+.navbar__title:hover {
+  color: var(--ifm-color-primary) !important;
+  text-decoration: none !important;
+}
+
+/* STRONGER NAVBAR FIXES */
+.navbar__brand,
+.navbar__title,
+.navbar__brand .navbar__title {
+  color: #000 !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+}
+
+.navbar__brand:hover,
+.navbar__title:hover,
+.navbar__brand:hover .navbar__title {
+  color: var(--ifm-color-primary) !important;
+}
+
+/* RIGHT MENU ITEMS - Use same grey as sidebar menu */
+.navbar__items--right {
+  margin-left: auto !important;
+  gap: 1rem !important;
+}
+
+.navbar__items--right .navbar__link {
+  color: var(--objectbox-grey-text) !important;
+  font-weight: 300 !important;
+  font-size: 0.9rem !important;
+}
+
+.navbar__items--right .navbar__link:hover {
+  color: var(--ifm-color-primary) !important;
+}
+
+/* Ensure all navbar links are consistent */
+.navbar__item .navbar__link {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .navbar__title {
+  color: #fff !important;
+}
+
+[data-theme='dark'] .navbar__link {
+  color: #fff !important;
+}
+
+[data-theme='dark'] .navbar__title:hover,
+[data-theme='dark'] .navbar__link:hover,
+[data-theme='dark'] .navbar__link--active {
+  color: var(--ifm-color-primary) !important;
+}
+
+[data-theme='dark'] .navbar__items--right .navbar__link {
+  color: #ccc !important;
+}
+
+/* ===== REMOVE EXTERNAL LINK ICONS ===== */
+/* Hide any SVG icons in navbar links */
+.navbar__link svg,
+.navbar__link .icon {
+  display: none !important;
+}
+
 /* ===== FINAL TAB STYLING ===== */
 /* Tab header container - light grey background for entire header area */
 .tabs {
@@ -77,7 +168,7 @@
   border-right: 1px solid var(--objectbox-grey-border) !important;
   border-top: 1px solid var(--objectbox-grey-border) !important;
   border-bottom: 1px solid var(--objectbox-grey-border) !important;
-  border-radius: 6px 6px 0 0 !important; /* Only top corners rounded */
+  border-radius: 6px 6px 0 0 !important;
   margin: 0 0 0 0 !important;
   padding: 0 !important;
   overflow: hidden !important;
@@ -88,7 +179,6 @@
 /* Tab content area */
 div[role="tabpanel"] {
   border: 1px solid var(--objectbox-grey-border) !important;
-  /*border-top: none !important;*/
   border-radius: 0 0 6px 6px !important;
   background-color: white !important;
   padding: 20px !important;
@@ -99,7 +189,6 @@ div[role="tabpanel"] {
   z-index: 1;
 }
 
-
 .tabs__item {
   background-color: var(--objectbox-grey-light) !important;
   border-right: 1px solid var(--objectbox-grey-border) !important;
@@ -109,25 +198,26 @@ div[role="tabpanel"] {
   border-bottom: none !important;
   border-top: none !important;
   border-left: none !important;
-  border-radius: 0 !important; /* NO rounded corners on any tabs */
-  margin: 0 !important; /* Remove any margin */
+  border-radius: 0 !important;
+  margin: 0 !important;
+  border-radius: 6px 6px 0 0 !important;
+  transition: all 0.2s ease !important;
 }
 
-/* Remove all rounded corners from first tab and ensure no left gap */
 .tabs__item:first-child {
-  border-radius: 0 !important; /* Completely square */
-  margin-left: 0 !important; /* No left gap */
+  border-radius: 0 !important;
+  margin-left: 0 !important;
 }
 
-/* Last tab - remove right border and ensure no right gap */
 .tabs__item:last-child {
   border-right: none !important;
-  margin-right: 0 !important; /* No right gap */
+  margin-right: 0 !important;
 }
 
 .tabs__item:hover {
   color: var(--ifm-color-primary) !important;
   background-color: var(--objectbox-grey-light) !important;
+  transform: translateY(-1px) !important;
 }
 
 .tabs__item--active {
@@ -140,7 +230,6 @@ div[role="tabpanel"] {
 }
 
 /* ===== CODE BLOCKS - PRESERVE DOCUSAURUS STYLING ===== */
-/* Only override background color for code blocks, preserve all other styling */
 div[role="tabpanel"] pre,
 div[role="tabpanel"] .prism-code {
   background-color: var(--objectbox-grey-light) !important;
@@ -148,7 +237,6 @@ div[role="tabpanel"] .prism-code {
   border-radius: 4px !important;
 }
 
-/* Ensure inline code gets grey background */
 div[role="tabpanel"] code:not(pre code) {
   background-color: var(--objectbox-grey-light) !important;
   border: 1px solid var(--objectbox-grey-border) !important;
@@ -165,14 +253,47 @@ div[role="tabpanel"] code:not(pre code) {
   color: var(--ifm-color-primary) !important;
 }
 
+/* ===== FANCY BUTTONS LIKE YOUR ORIGINAL SITE ===== */
+
+.button--primary,
+.button.button--primary {
+  background: linear-gradient(135deg, #17A6A6 0%, #1bb8b8 100%) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 12px 24px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(23, 166, 166, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.button--primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(23, 166, 166, 0.4) !important;
+}
+
+.button--secondary {
+  background: white !important;
+  border: 2px solid #17A6A6 !important;
+  color: #17A6A6 !important;
+  border-radius: 6px !important;
+  padding: 10px 22px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.button--secondary:hover {
+  background: #17A6A6 !important;
+  color: white !important;
+  transform: translateY(-1px) !important;
+}
+
 /* ===== INFO BOXES ===== */
-/* Style for info admonitions */
 .admonition-info {
   border-left: 3px solid #17A6A6 !important;
   background-color: rgba(84, 199, 236, 0.05) !important;
   border-radius: 0 4px 4px 0 !important;
-  padding-left: 15px !important; /* Add indentation */
-  margin-left: 20px !important; /* Adjust margin for overall indentation */
+  padding-left: 15px !important;
+  margin-left: 20px !important;
 }
 
 .admonition-info .admonition-heading h5 {
@@ -230,3 +351,147 @@ div[role="tabpanel"] code:not(pre code) {
   background-color: #2a2a2a !important;
   border-color: #444 !important;
 }
+
+/* ===== CUSTOM NAVIGATION CARDS ===== */
+.custom-nav-card {
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.custom-nav-card:hover {
+  border-color: #17A6A6;
+}
+
+.custom-nav-card-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.custom-nav-card-link:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
+.custom-nav-card-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.custom-nav-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: normal;
+  color: #24292f;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.custom-nav-card:hover .custom-nav-card-title {
+  color: #17A6A6;
+}
+
+.custom-nav-card-description {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #656d76;
+  line-height: 1.4;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.custom-nav-card-arrow {
+  font-size: 1.5rem;
+  color: #656d76;
+  margin-left: 1rem;
+  transition: color 0.2s ease;
+  font-weight: normal;
+  flex-shrink: 0;
+}
+
+.custom-nav-card:hover .custom-nav-card-arrow {
+  color: #17A6A6;
+}
+
+/* Dark mode support for custom cards */
+[data-theme='dark'] .custom-nav-card {
+  background: #1a1a1a;
+  border-color: #444;
+}
+
+[data-theme='dark'] .custom-nav-card:hover {
+  border-color: #17A6A6;
+}
+
+[data-theme='dark'] .custom-nav-card-title {
+  color: #fff;
+}
+
+[data-theme='dark'] .custom-nav-card:hover .custom-nav-card-title {
+  color: #17A6A6;
+}
+
+[data-theme='dark'] .custom-nav-card-description {
+  color: #aaa;
+}
+
+[data-theme='dark'] .custom-nav-card-arrow {
+  color: #aaa;
+}
+
+[data-theme='dark'] .custom-nav-card:hover .custom-nav-card-arrow {
+  color: #17A6A6;
+}
+
+/* ===== IMPROVED INFO BOXES - REMOVE "INFO" TEXT ===== */
+.admonition-info .admonition-heading {
+  display: none;
+}
+
+.admonition-info .admonition-icon {
+  margin-right: 0.5rem;
+}
+
+.admonition-info .admonition-content {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.admonition-info {
+  padding: 0.75rem 1rem;
+}
+
+.admonition-info .admonition-content > p:first-child {
+  margin-top: 0;
+}
+
+.admonition-info .admonition-content > p:last-child {
+  margin-bottom: 0;
+}
+
+div.admonition.admonition-info .admonition-heading h5 {
+  display: none !important;
+}
+
+div.admonition.admonition-info .admonition-content {
+  display: inline-block;
+  vertical-align: top;
+  width: calc(100% - 2rem);
+}
+
+div.admonition.admonition-info .admonition-icon {
+  display: inline-block;
+  vertical-align: top;
+  width: 1.5rem;
+}
+

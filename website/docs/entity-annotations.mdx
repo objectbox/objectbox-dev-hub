@@ -69,7 +69,7 @@ The following annotations are currently supported:
 
 * **name** - specifies the name to use in the database if it's desired to be different than what the FlatBuffer schema "table" is called.
 * **transient** - this entity is skipped, no code is generated for it. Useful if you have custom FlatBuffer handling but still want to generate ObjectBox binding code for some parts of the same file.
-* **uid** - used to explicitly specify UID used with this entity; used when renaming entities. See [Schema changes](schema-changes.md) for more details.
+* **uid** - used to explicitly specify UID used with this entity; used when renaming entities. See [Schema changes](schema-changes) for more details.
 * **relation** - adds a standalone (many-to-many) relation, usually to another entity. Example: creating a relation to the authors of a book: `objectbox:relation(name=authors,to=Author)`
 * **sync** - enables synchronization for the entity - only relevant with [ObjectBox Sync](https://objectbox.io/sync/) library builds. Entities not marked with this annotation will not be synchronized to the server, i.e. they're local-only.
   * `sync(sharedGlobalIds)` can be used to switch from the default behaviour (ID-mapping) to using a global ID space. This flag tells ObjectBox to treat object IDs globally and thus no ID mapping (local `<->` global) is performed. Often this is used with `id(assignable)` annotation and some special ID scheme.
@@ -89,5 +89,5 @@ The following annotations are currently supported:
 * **relation** - declares the field as a relation ID, linking to another Entity which must be specified as a value of this annotation.
 * **name** - specifies the name to use in the database if it's desired to be different than what the FlatBuffer schema "field" is called.
 * **transient** - this property is skipped, no code is generated for it. Useful if you have custom FlatBuffer handling but still want to generate ObjectBox binding code for the entity.
-* **uid** - used to explicitly specify UID used with this property; used when renaming properties. See [Schema changes](schema-changes.md) for more details.
+* **uid** - used to explicitly specify UID used with this property; used when renaming properties. See [Schema changes](schema-changes) for more details.
 * **unique** - set to enforce that values are unique before an entity is inserted/updated. A `put` operation will abort and return an error if the unique constraint is violated.

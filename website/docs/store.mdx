@@ -277,7 +277,7 @@ obx::Store store(options);
 </TabItem>
 <TabItem value="c" label="C">
 
-```
+```c
 OBX_store_options* opt = obx_opt();
 obx_opt_async_max_in_tx_duration(opt, 1000);
 obx_store_open(opt);
@@ -304,7 +304,7 @@ Available options for fine-tuning asynchronous operations:
 
 ### Debug Flags
 
-When debugging or fine-tuning performance you can enable [logging](dev-tools-and-debugging.md#logging) of various events at the info level.
+When debugging or fine-tuning performance you can enable [logging](dev-tools-and-debugging#logging) of various events at the info level.
 
 <Tabs>
 <TabItem value="cpp" label="C++">
@@ -335,8 +335,8 @@ obx_store_open(opt);
 
 Once you created the store, it gives you access to several ways to interact with the data you store in it; aka the database:
 
-* [**Box API**](getting-started.md#working-with-object-boxes)**:** easy to use object-based API with implicit transactions. It is used in combination with the ObjectBox Generator, which generates the source code for data and Box classes. Check the getting started track for examples.
-* [**Query API**](queries.md)**:** In combination with the Box API, you can build powerful queries using the query builder. Once built, query instances can be executed multiple times to retrieve data.&#x20;
-* [**Explicit Transactions**](transactions.md)**:** Often it's a good idea to group several operations into a single "batch", or more precisely, one transaction. Batched transactions are not only faster, but also consider safe state changes for your data.
+* [**Box API**](getting-started#working-with-object-boxes)**:** easy to use object-based API with implicit transactions. It is used in combination with the ObjectBox Generator, which generates the source code for data and Box classes. Check the getting started track for examples.
+* [**Query API**](queries)**:** In combination with the Box API, you can build powerful queries using the query builder. Once built, query instances can be executed multiple times to retrieve data.&#x20;
+* [**Explicit Transactions**](transactions)**:** Often it's a good idea to group several operations into a single "batch", or more precisely, one transaction. Batched transactions are not only faster, but also consider safe state changes for your data.
 
 

@@ -39,10 +39,7 @@ FetchContent_MakeAvailable(objectbox)
 
 add_executable(myapp main.cpp)
 target_link_libraries(myapp objectbox)
-```
-
-
-
+```cmake
 If you want to use an ObjectBox Sync variant of the library, change the `target_link_libraries` to:&#x20;
 
 ```cmake
@@ -73,8 +70,7 @@ endif()
 
 add_executable(myapp main.cpp)
 target_link_libraries(myapp objectbox)
-```
-
+```cmake
 If you want to integrate the ObjectBox-Generator via CMake (as an alternative to offline installation and pre-generation of C++ sources), use the following snippet:
 
 ```cmake
@@ -88,8 +84,7 @@ add_obx_schema(
   INSOURCE # Opt-in: Generate in source directory
   CXX_STANDARD 11 # Defaults to C++14 otherwise
 )
-```
-
+```cmake
 \
 If you want to use an ObjectBox Sync variant of the library, change the list line to:&#x20;
 
@@ -204,7 +199,7 @@ Try running `objectbox-generator -help` to verify the installation and see the o
 </TabItem>
 </Tabs>
 
-For more details, please refer to the [Generator documentation page](generator.md).
+For more details, please refer to the [Generator documentation page](generator).
 
 ## FlatBuffers
 
@@ -241,13 +236,13 @@ For special setups, the objectbox.hpp header also allows a configuration, which 
 :::
 
 </TabItem>
-<TabItem value="cmake1" label="C without CMake">
+<TabItem value="c" label="C without CMake">
 
 Get [flatcc library and headers](https://github.com/dvidelabs/flatcc). You can link your program to the to the static runtime library.
 
 CMake example (check the link above for the latest version):
 
-```
+```c
 FetchContent_Declare(
     flatcc
     GIT_REPOSITORY https://github.com/dvidelabs/flatcc.git

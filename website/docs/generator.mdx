@@ -15,12 +15,12 @@ This is the reference guide on the ObjectBox Generator, a build-time tool for Ob
 
 
 :::info
-For an intro to the generator, see also the [installation guide](installation.md#objectbox-generator) and [Generating Binding Code](getting-started.md#generating-binding-code).
+For an intro to the generator, see also the [installation guide](installation#objectbox-generator) and [Generating Binding Code](getting-started#generating-binding-code).
 :::
 
-When using ObjectBox within your project, you typically need two things: the runtime library and the the build-time ObjectBox Generator. The generator takes a data model (see [Entity Annotations](entity-annotations.md)) as input and generates `struct`s, a data model representation as code and additional glue code for a tight and fast integration of your individual data types and the ObjectBox API.
+When using ObjectBox within your project, you typically need two things: the runtime library and the the build-time ObjectBox Generator. The generator takes a data model (see [Entity Annotations](entity-annotations)) as input and generates `struct`s, a data model representation as code and additional glue code for a tight and fast integration of your individual data types and the ObjectBox API.
 
-If you are using CMake, it's highly recommended to use the CMake integration of the ObjectBox Generator. For all other setups, triggering the generator in [standalone mode](generator.md#standalone) is also supported.
+If you are using CMake, it's highly recommended to use the CMake integration of the ObjectBox Generator. For all other setups, triggering the generator in [standalone mode](generator#standalone) is also supported.
 
 :::info
 The ObjectBox Generator binary is currently not available for Linux/Windows ARM architectures (pull requests are welcome). The macOS as universal binary supports ARM64 and AMD64 architectures.
@@ -32,7 +32,7 @@ The ObjectBox Generator is well integrated into CMake.&#x20;
 
 Enabling the Generator via CMake
 
-Once you have the ObjectBox runtime library set up via `FetchContent` (see [installation](installation.md)), it only takes one more command to enable the Generator:
+Once you have the ObjectBox runtime library set up via `FetchContent` (see [installation](installation)), it only takes one more command to enable the Generator:
 
 ```cmake
 # Note: downloads automatically if not found locally
@@ -91,7 +91,7 @@ By default, generated files (except the model JSON file) are written relative to
 
 ### Details on finding the CMake module
 
-The CMake module is implicitly downloaded together with objectbox shared libraries as described in [Installation](installation.md).\
+The CMake module is implicitly downloaded together with objectbox shared libraries as described in [Installation](installation).\
 \
 The latest version of the find module is also available from [https://raw.githubusercontent.com/objectbox/objectbox-generator/main/cmake/FindObjectBoxGenerator.cmake](https://raw.githubusercontent.com/objectbox/objectbox-generator/main/cmake/FindObjectBoxGenerator.cmake)
 

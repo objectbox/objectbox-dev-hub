@@ -16,7 +16,7 @@ The ObjectBox C / C++ database comes with automatic schema migration. Learn all 
 
 ObjectBox manages its data model (schema) mostly automatically. The data model is defined by the Entities you define in FlatBuffer schema files. When you **add or remove** entities or properties of your entities, **ObjectBox takes care** of those changes when you launch `objectbox-generator` on the changed `.fbs` file without any further action needed from you.
 
-For other changes like **renaming or changing the type**, ObjectBox needs **extra information** to make things unambiguous. This works using unique identifiers (UIDs) specified by the [uid annotation](entity-annotations.md#supported-annotations), as we will see below.
+For other changes like **renaming or changing the type**, ObjectBox needs **extra information** to make things unambiguous. This works using unique identifiers (UIDs) specified by the [uid annotation](entity-annotations#supported-annotations), as we will see below.
 
 ## Renaming Entities and Properties <a href="#renaming-entities-and-properties" id="renaming-entities-and-properties"></a>
 
@@ -57,7 +57,7 @@ uid annotation value must not be empty:
 ```
 
 :::info
-Note how for a property, the output is slightly different. It's because you have two options, either renaming the property or resetting (clearing) it's stored data. See [Reset data - new UID on a property](schema-changes.md#reset-data-new-uid-on-a-property) for more details.
+Note how for a property, the output is slightly different. It's because you have two options, either renaming the property or resetting (clearing) it's stored data. See [Reset data - new UID on a property](schema-changes#reset-data-new-uid-on-a-property) for more details.
 :::
 
 &#x20;**Step 3:** Apply the UID printed in the error message to your entity/property:

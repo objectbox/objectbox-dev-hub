@@ -2,6 +2,7 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 
 const sidebars: SidebarsConfig = {
   docs: [
+    'README',  // ← Add this line
     {
       type: 'category',
       label: 'Getting Started',

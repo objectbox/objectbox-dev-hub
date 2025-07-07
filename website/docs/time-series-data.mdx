@@ -26,7 +26,7 @@ Also check out the [ObjectBox TS example project ](https://github.com/objectbox/
 
 ### Defining the Time Series type
 
-Assuming you are already working with ObjectBox Generator (see [getting started](getting-started.md)), you already know about FlatBuffer schema files and how to generate glue code to work conveniently with ObjectBox. Let's have a look at this simple definition file:
+Assuming you are already working with ObjectBox Generator (see [getting started](getting-started)), you already know about FlatBuffer schema files and how to generate glue code to work conveniently with ObjectBox. Let's have a look at this simple definition file:
 
 ```fbs title="timeseries.fbs"
 table SensorData {
@@ -66,7 +66,7 @@ Internally, however, data is stored differently. Most importantly, there is no s
 Time series data do not allow updates to the time property. As time series data is usually "immutable", this is typically not an issue. If you must update an object's time, remove the object, set its ID to 0, set the new time and put it. This results in a new object with a new ID.
 :::
 
-In many ways time series objects work like regular objects. You can get and remove them, or [query](queries.md) for them. The API stays the same.
+In many ways time series objects work like regular objects. You can get and remove them, or [query](queries) for them. The API stays the same.
 
 ## Example Time Series project
 

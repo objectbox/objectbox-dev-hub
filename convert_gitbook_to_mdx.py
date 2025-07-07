@@ -158,6 +158,101 @@ def fix_html_and_escape(content):
     print("[DEBUG] fix_html_and_escape completed (no brace escaping)")
     return content
 
+def fix_gitbook_content_ref_to_cards(content):
+    """
+    Fix GitBook content-ref blocks by converting them to styled Docusaurus cards
+    with improved button-like appearance and hover effects.
+    """
+    import re
+    
+    print("[DEBUG] fix_gitbook_content_ref_to_cards called")
+    
+    # Pattern to match GitBook content-ref blocks
+    content_ref_pattern = r'{% content-ref url="([^"]*)" %}\s*\[([^\]]*)\]\([^)]*\)\s*{% endcontent-ref %}'
+    
+    def content_ref_to_card(match):
+        url = match.group(1)
+        link_text = match.group(2)
+        
+        print(f"[DEBUG] Converting content-ref to card: url='{url}', text='{link_text}'")
+        
+        # Convert .md to clean URL for Docusaurus routing
+        if url.endswith('.md'):
+            clean_url = url[:-3]
+        elif url.endswith('.mdx'):
+            clean_url = url[:-4]
+        else:
+            clean_url = url
+        
+        # Create a friendly title from the filename
+        if clean_url == 'installation':
+            card_title = 'Installation'
+            card_description = 'Get ObjectBox library and generator set up in your project'
+        elif clean_url == 'getting-started':
+            card_title = 'How to get started'
+            card_description = 'Learn the basics of using ObjectBox in your application'
+        else:
+            # Fallback: use the link text as title
+            card_title = link_text.replace('.md', '').replace('-', ' ').title()
+            card_description = f'Learn more about {card_title.lower()}'
+        
+        # Create a styled card component with custom classes for styling
+        card_html = f'''<div className="custom-nav-card">
+  <a href="/{clean_url}" className="custom-nav-card-link">
+    <div className="custom-nav-card-content">
+      <h3 className="custom-nav-card-title">{card_title}</h3>
+      <p className="custom-nav-card-description">{card_description}</p>
+    </div>
+    <div className="custom-nav-card-arrow">›</div>
+  </a>
+</div>'''
+        
+        print(f"[DEBUG] Created styled card for: {card_title}")
+        return card_html
+    
+    # Count content-ref blocks before conversion
+    content_refs = re.findall(content_ref_pattern, content, flags=re.DOTALL)
+    print(f"[DEBUG] Found {len(content_refs)} content-ref blocks to convert to cards")
+    
+    # Debug: Show what content-refs were found
+    for i, (url, text) in enumerate(content_refs):
+        print(f"[DEBUG] Content-ref {i+1}: url='{url}', text='{text}'")
+    
+    # Apply the conversion
+    result = re.sub(content_ref_pattern, content_ref_to_card, content, flags=re.DOTALL)
+    
+    # Check for any remaining GitBook content-ref patterns
+    remaining_refs = re.findall(r'{% content-ref|{% endcontent-ref %}', result)
+    if remaining_refs:
+        print(f"[DEBUG] WARNING: Found {len(remaining_refs)} unconverted content-ref elements")
+    else:
+        print("[DEBUG] SUCCESS: All GitBook content-ref blocks converted to styled cards")
+    
+    return result
+
+
+    
+    # Count content-ref blocks before conversion
+    content_refs = re.findall(content_ref_pattern, content, flags=re.DOTALL)
+    print(f"[DEBUG] Found {len(content_refs)} content-ref blocks to convert to cards")
+    
+    # Debug: Show what content-refs were found
+    for i, (url, text) in enumerate(content_refs):
+        print(f"[DEBUG] Content-ref {i+1}: url='{url}', text='{text}'")
+    
+    # Apply the conversion
+    result = re.sub(content_ref_pattern, content_ref_to_card, content, flags=re.DOTALL)
+    
+    # Check for any remaining GitBook content-ref patterns
+    remaining_refs = re.findall(r'{% content-ref|{% endcontent-ref %}', result)
+    if remaining_refs:
+        print(f"[DEBUG] WARNING: Found {len(remaining_refs)} unconverted content-ref elements")
+    else:
+        print("[DEBUG] SUCCESS: All GitBook content-ref blocks converted to cards")
+    
+    return result
+
+
 
 def enhanced_convert_gitbook_code_blocks_simple(content):
     """
@@ -318,6 +413,7 @@ def fix_all_remaining_gitbook_blocks(content):
     """
     Final cleanup function to catch any remaining GitBook patterns that weren't converted.
     This is a fallback to ensure no GitBook syntax remains in the MDX files.
+    ENHANCED: Now includes content-ref block handling.
     """
     import re
     
@@ -327,10 +423,12 @@ def fix_all_remaining_gitbook_blocks(content):
     remaining_code_blocks = re.findall(r'{% code[^}]*%}.*?{% endcode %}', content, flags=re.DOTALL)
     remaining_hints = re.findall(r'{% hint[^}]*%}.*?{% endhint %}', content, flags=re.DOTALL)
     remaining_tabs = re.findall(r'{% tabs %}.*?{% endtabs %}', content, flags=re.DOTALL)
+    remaining_content_refs = re.findall(r'{% content-ref[^}]*%}.*?{% endcontent-ref %}', content, flags=re.DOTALL)
     
     print(f"[DEBUG] Found {len(remaining_code_blocks)} remaining code blocks")
     print(f"[DEBUG] Found {len(remaining_hints)} remaining hint blocks")
     print(f"[DEBUG] Found {len(remaining_tabs)} remaining tab blocks")
+    print(f"[DEBUG] Found {len(remaining_content_refs)} remaining content-ref blocks")
     
     # Fix remaining code blocks with simple conversion
     if remaining_code_blocks:
@@ -384,6 +482,39 @@ def fix_all_remaining_gitbook_blocks(content):
         
         content = re.sub(pattern, hint_replace, content, flags=re.DOTALL)
     
+    # Fix remaining content-ref blocks (NEW!)
+    if remaining_content_refs:
+        print("[DEBUG] Converting remaining content-ref blocks...")
+        for i, block in enumerate(remaining_content_refs[:3]):  # Show first 3
+            print(f"[DEBUG] Remaining content-ref block {i+1}: {block[:100]}...")
+        
+        # Pattern to match GitBook content-ref blocks
+        content_ref_pattern = r'{% content-ref url="([^"]*)" %}\s*\[([^\]]*)\]\([^)]*\)\s*{% endcontent-ref %}'
+        
+        def content_ref_replace(match):
+            url = match.group(1)
+            link_text = match.group(2)
+            
+            print(f"[DEBUG] Converting content-ref: url='{url}', text='{link_text}'")
+            
+            # Convert .md to .mdx for internal links, and remove .md/.mdx extension for Docusaurus routing
+            if url.endswith('.md'):
+                # Remove .md extension for Docusaurus internal links
+                clean_url = url[:-3]
+            elif url.endswith('.mdx'):
+                # Remove .mdx extension for Docusaurus internal links
+                clean_url = url[:-4]
+            else:
+                clean_url = url
+            
+            # Create a simple link
+            result = f'[{link_text}]({clean_url})'
+            
+            print(f"[DEBUG] Converted to: {result}")
+            return result
+        
+        content = re.sub(content_ref_pattern, content_ref_replace, content, flags=re.DOTALL)
+    
     # Fix remaining tab blocks
     if remaining_tabs:
         print("[DEBUG] Converting remaining tab blocks...")
@@ -401,6 +532,8 @@ def fix_all_remaining_gitbook_blocks(content):
         print("[DEBUG] SUCCESS: All GitBook patterns cleaned up!")
     
     return content
+
+
 
 
 def extract_description_from_frontmatter(content):
@@ -716,7 +849,10 @@ def convert_gitbook_hints(content):
     return content
 
 def convert_gitbook_tabs(content):
-    """Convert GitBook tabs to Docusaurus Tabs/TabItem components with proper C++ mapping."""
+    """
+    Convert GitBook tabs to Docusaurus Tabs/TabItem components with proper C++ mapping.
+    ENHANCED: Now propagates language context from tab titles to code blocks within tabs.
+    """
     import re
     
     print("[DEBUG] convert_gitbook_tabs called")
@@ -724,6 +860,54 @@ def convert_gitbook_tabs(content):
     # Pattern to match GitBook tabs structure
     tabs_pattern = r'{% tabs %}\s*(.*?)\s*{% endtabs %}'
     tab_pattern = r'{% tab title="([^"]*)" %}\s*(.*?)\s*{% endtab %}'
+    
+    def extract_language_from_title(title):
+        """Extract programming language from tab title."""
+        title_lower = title.lower().strip()
+        
+        # Specific mappings for common cases
+        if title_lower in ['c++', 'cpp']:
+            return 'cpp'
+        elif title_lower == 'c' or 'c without' in title_lower:
+            return 'c'
+        elif 'cmake' in title_lower:
+            return 'cmake'
+        elif 'bash' in title_lower or 'shell' in title_lower:
+            return 'bash'
+        elif 'python' in title_lower:
+            return 'python'
+        elif 'java' in title_lower:
+            return 'java'
+        elif 'swift' in title_lower:
+            return 'swift'
+        elif 'kotlin' in title_lower:
+            return 'kotlin'
+        elif 'dart' in title_lower:
+            return 'dart'
+        elif 'go' in title_lower or 'golang' in title_lower:
+            return 'go'
+        else:
+            return None
+    
+    def fix_code_blocks_in_tab_content(tab_content, language_context):
+        """Fix empty code blocks within tab content using language context."""
+        if not language_context:
+            return tab_content
+        
+        print(f"[DEBUG] Fixing code blocks in tab with language context: {language_context}")
+        
+        # Pattern to find empty code blocks (no language specified)
+        empty_code_pattern = r'```\s*\n(.*?)\n```'
+        
+        def replace_empty_code_block(match):
+            code_content = match.group(1)
+            print(f"[DEBUG] Found empty code block, adding language '{language_context}': {code_content[:30]}...")
+            return f'```{language_context}\n{code_content}\n```'
+        
+        # Apply the fix
+        result = re.sub(empty_code_pattern, replace_empty_code_block, tab_content, flags=re.DOTALL)
+        
+        return result
     
     def tabs_replace(match):
         tabs_content = match.group(1)
@@ -744,13 +928,21 @@ def convert_gitbook_tabs(content):
         for i, (title, tab_content) in enumerate(tabs):
             print(f"[DEBUG] Processing tab {i+1}: title='{title}'")
             
+            # Extract language context from title
+            language_context = extract_language_from_title(title)
+            print(f"[DEBUG] Extracted language context: {language_context}")
+            
+            # Fix code blocks within this tab using the language context
+            if language_context:
+                tab_content = fix_code_blocks_in_tab_content(tab_content, language_context)
+            
             # Generate value from title with specific mappings
             title_lower = title.lower().strip()
             
             # Specific mappings for common cases
             if title_lower in ['c++', 'cpp']:
                 value = 'cpp'
-            elif title_lower == 'c':
+            elif title_lower == 'c' or 'c without' in title_lower:
                 value = 'c'
             elif 'cmake' in title_lower and ('cpp' in title_lower or 'c++' in title_lower):
                 value = 'cmakecpp'
@@ -812,18 +1004,17 @@ def convert_gitbook_tabs(content):
     print("[DEBUG] convert_gitbook_tabs completed")
     return result
 
+
 def fix_text_code_blocks(content):
     """
-    Fix code blocks that were converted to 'text' language by detecting the actual language
-    or converting them to proper markdown code blocks.
-    IMPROVED: Works with code blocks inside tabs and other contexts.
+    Fix code blocks that were converted to 'text' language by detecting the actual language.
+    SAFER VERSION: Only fixes ```text blocks, avoids breaking existing working code blocks.
     """
     import re
     
     print("[DEBUG] fix_text_code_blocks called")
     
-    # IMPROVED: More flexible pattern that works with tabs and other content
-    # This pattern finds ```text at the start of a line, followed by content, ending with ```
+    # ONLY fix ```text blocks - don't touch other code blocks that might be working fine
     text_block_pattern = r'^```text\s*\n(.*?)\n```'
     
     def detect_language_and_replace(match):
@@ -866,7 +1057,7 @@ def fix_text_code_blocks(content):
         
         return result
     
-    # Count text blocks before conversion using the improved pattern
+    # Count text blocks before conversion
     text_blocks = re.findall(text_block_pattern, content, flags=re.DOTALL | re.MULTILINE)
     print(f"[DEBUG] Found {len(text_blocks)} ```text code blocks to fix")
     
@@ -874,7 +1065,7 @@ def fix_text_code_blocks(content):
     for i, block in enumerate(text_blocks):
         print(f"[DEBUG] Text block {i+1}: {block.strip()[:50]}...")
     
-    # Apply the conversion using the improved pattern
+    # Apply the conversion ONLY to ```text blocks
     result = re.sub(text_block_pattern, detect_language_and_replace, content, flags=re.DOTALL | re.MULTILINE)
     
     # Count remaining text blocks
@@ -885,6 +1076,102 @@ def fix_text_code_blocks(content):
         print(f"[DEBUG] Successfully converted {len(text_blocks) - len(remaining_text_blocks)} text blocks to proper languages")
     
     return result
+
+
+    
+    # Count BOTH types of problematic blocks before conversion
+    text_blocks = re.findall(text_block_pattern, content, flags=re.DOTALL | re.MULTILINE)
+    empty_blocks = re.findall(empty_block_pattern, content, flags=re.DOTALL | re.MULTILINE)
+    
+    print(f"[DEBUG] Found {len(text_blocks)} ```text code blocks to fix")
+    print(f"[DEBUG] Found {len(empty_blocks)} empty ``` code blocks to fix")
+    
+    # Debug: Show what blocks were found
+    for i, block in enumerate(text_blocks):
+        print(f"[DEBUG] Text block {i+1}: {block.strip()[:50]}...")
+    
+    for i, block in enumerate(empty_blocks):
+        print(f"[DEBUG] Empty block {i+1}: {block.strip()[:50]}...")
+    
+    # Apply conversions for BOTH patterns
+    # First fix ```text blocks
+    result = re.sub(text_block_pattern, detect_language_and_replace, content, flags=re.DOTALL | re.MULTILINE)
+    
+    # Then fix empty ``` blocks
+    result = re.sub(empty_block_pattern, detect_language_and_replace, result, flags=re.DOTALL | re.MULTILINE)
+    
+    # Count remaining problematic blocks
+    remaining_text_blocks = re.findall(r'^```text\s*\n', result, flags=re.MULTILINE)
+    remaining_empty_blocks = re.findall(r'^```\s*\n', result, flags=re.MULTILINE)
+    
+    print(f"[DEBUG] {len(remaining_text_blocks)} ```text blocks remain after conversion")
+    print(f"[DEBUG] {len(remaining_empty_blocks)} empty ``` blocks remain after conversion")
+    
+    total_fixed = len(text_blocks) + len(empty_blocks) - len(remaining_text_blocks) - len(remaining_empty_blocks)
+    if total_fixed > 0:
+        print(f"[DEBUG] Successfully converted {total_fixed} code blocks to proper languages")
+    
+    return result
+
+def fix_internal_links(content):
+    """
+    Fix internal links that still point to .md files.
+    Convert them to proper Docusaurus links without extensions.
+    """
+    import re
+    
+    print("[DEBUG] fix_internal_links called")
+    
+    # Pattern to find markdown links that point to .md files
+    # Matches: [text](file.md) or [text](file.md#anchor)
+    md_link_pattern = r'\[([^\]]*)\]\(([^)]*\.md(?:#[^)]*)?)\)'
+    
+    def fix_link(match):
+        link_text = match.group(1)
+        link_url = match.group(2)
+        
+        print(f"[DEBUG] Found .md link: [{link_text}]({link_url})")
+        
+        # Handle anchors (e.g., file.md#section)
+        if '#' in link_url:
+            file_part, anchor_part = link_url.split('#', 1)
+            # Remove .md extension from file part
+            if file_part.endswith('.md'):
+                clean_file = file_part[:-3]
+            else:
+                clean_file = file_part
+            clean_url = f"{clean_file}#{anchor_part}"
+        else:
+            # No anchor, just remove .md extension
+            if link_url.endswith('.md'):
+                clean_url = link_url[:-3]
+            else:
+                clean_url = link_url
+        
+        result = f'[{link_text}]({clean_url})'
+        print(f"[DEBUG] Fixed link: {result}")
+        return result
+    
+    # Count .md links before conversion
+    md_links = re.findall(md_link_pattern, content)
+    print(f"[DEBUG] Found {len(md_links)} internal .md links to fix")
+    
+    # Debug: Show what links were found
+    for i, (text, url) in enumerate(md_links[:5]):  # Show first 5
+        print(f"[DEBUG] Link {i+1}: [{text}]({url})")
+    
+    # Apply the conversion
+    result = re.sub(md_link_pattern, fix_link, content)
+    
+    # Count remaining .md links
+    remaining_md_links = re.findall(r'\[([^\]]*)\]\(([^)]*\.md(?:#[^)]*)?)\)', result)
+    print(f"[DEBUG] {len(remaining_md_links)} .md links remain after conversion")
+    
+    if len(md_links) > len(remaining_md_links):
+        print(f"[DEBUG] Successfully fixed {len(md_links) - len(remaining_md_links)} internal links")
+    
+    return result
+
 
 
 
@@ -1024,6 +1311,9 @@ def convert_file(input_file, output_file=None):  # Make output_file optional
     
     print("[DEBUG] Step 7: MDX specials - DISABLED")
     content = escape_mdx_specials(content)  # This is now a no-op but still called for debug
+
+    print("[DEBUG] Step 8.5: Convert content-ref to cards")
+    content = fix_gitbook_content_ref_to_cards(content)
     
     print("[DEBUG] Step 8: List fixes")
     content = fix_mdx_list_dash(content)
@@ -1060,11 +1350,12 @@ def convert_file(input_file, output_file=None):  # Make output_file optional
     print("[DEBUG] Step 15: Escape MDX specials")
     content = escape_mdx_specials(content)
 
-    print("[DEBUG] About to call Step 16...")
-    print("[DEBUG] Step 16: Fix text code blocks")
-    
+    print("[DEBUG] Step 16: Fix text code blocks") 
     content = fix_text_code_blocks(content)
-    print("[DEBUG] Step 16 completed")
+
+    print("[DEBUG] Step 17: Fix internal links")
+    content = fix_internal_links(content)
+
     
     # Check for problematic backticks in JSX attributes before writing
     lines = content.splitlines()

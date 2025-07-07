@@ -42,58 +42,62 @@ const config: Config = {
   ],
 ],
 
+themes: [
+  [
+    '@easyops-cn/docusaurus-search-local',
+    {
+      hashed: true,
+      language: ['en'],
+      highlightSearchTermsOnTargetPage: true,
+      explicitSearchResultPath: true,
+    },
+  ],
+],
+
+
 
   themeConfig: {
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/objectbox-social-card.jpg',
     navbar: {
       title: 'ObjectBox C/C++',
       logo: {
         alt: 'ObjectBox Logo',
-        src: 'img/objectbox-logo.svg',
+        src: 'img/objectbox-logo.jpg',
       },
       items: [
+        // Right side items in the order you want them to appear:
         {
-          type: 'docSidebar',
-          sidebarId: 'docs',      // this must match your sidebars.ts export
-          position: 'left',
-          label: 'Docs',
-        },
-        {
-          href: 'https://github.com/objectbox/objectbox-c-cpp-docs',
-          label: 'GitHub',
+          href: 'https://objectbox.io',
+          label: 'ObjectBox.io',
           position: 'right',
-        },
-      ],
-    },
-    footer: {
-      style: 'dark',
-      links: [
-        {
-          title: 'Docs',
-          items: [
-            {
-              label: 'Installation',
-              to: '/installation',
-            },
-          ],
+          //target: '_self', // ← This prevents external link behavior
         },
         {
-          title: 'More',
-          items: [
-            {
-              href: 'https://github.com/objectbox/objectbox-c-cpp-docs',
-              label: 'GitHub',
-            },
-          ],
+          href: 'https://docs.objectbox.io/sync',
+          label: 'Sync Docs', 
+          position: 'right',
+          //  target: '_self', // ← This prevents external link behavior
         },
+        {
+          href: 'https://twitter.com/objectbox_io',
+          label: 'Follow us',
+          position: 'right',
+          //target: '_self', // ← This prevents external link behavior
+        },
+        
       ],
-      copyright: `© ${new Date().getFullYear()} ObjectBox`,
     },
+    copyright: `© ${new Date().getFullYear()} ObjectBox`,
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
-      additionalLanguages: ['cmake', 'bash', 'c', 'cpp'],
+      additionalLanguages: [
+        'cmake', 'bash', 'c', 'cpp',
+        'swift', 'kotlin', 'java', 'python', 
+        'dart', 'go', 'protobuf'
+      ],
     },
+    
 
   } satisfies Preset.ThemeConfig,
 };

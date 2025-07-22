@@ -8,6 +8,7 @@ const config: Config = {
   favicon: 'img/favicon.ico',
 
   url: 'https://cpp.objectbox.io',
+    /*baseUrl: '/',*/
   baseUrl: '/',
 
   organizationName: 'objectbox', 
@@ -20,6 +21,26 @@ const config: Config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
+
+  themes: [
+    [
+     '@easyops-cn/docusaurus-search-local',
+    {
+      hashed: true,
+      language: ['en'],
+      highlightSearchTermsOnTargetPage: true,
+      explicitSearchResultPath: false,  // Changed from true - this can cause 404s
+      indexDocs: true,
+      indexBlog: false,
+      indexPages: true,
+      docsRouteBasePath: '/',
+      searchResultLimits: 8,
+      searchResultContextMaxLength: 50,
+      ignoreFiles: [],
+    },
+    ],
+  ],
+
 
  presets: [
   [
@@ -38,19 +59,17 @@ const config: Config = {
           require.resolve('./src/css/custom.css'),
         ],
       },
+      sitemap: {           
+        lastmod: 'date',
+        changefreq: 'weekly',
+        priority: 0.5,
+        filename: 'sitemap.xml',
+      },
+      gtag: {                    
+        trackingID: 'G-2LXKBNQ3TW',
+        anonymizeIP: true,
+      },
     } satisfies Preset.Options,
-  ],
-],
-
-themes: [
-  [
-    '@easyops-cn/docusaurus-search-local',
-    {
-      hashed: true,
-      language: ['en'],
-      highlightSearchTermsOnTargetPage: true,
-      explicitSearchResultPath: true,
-    },
   ],
 ],
 
@@ -59,10 +78,11 @@ themes: [
   themeConfig: {
     image: 'img/objectbox-social-card.jpg',
     navbar: {
-      title: 'ObjectBox C/C++',
+      title: 'C / C++ Docs',
       logo: {
         alt: 'ObjectBox Logo',
-        src: 'img/objectbox-logo.jpg',
+        src: 'img/objectbox-logo.jpg', // Logo for light mode
+        srcDark: 'img/objectbox-logo-dm.png', // Logo for dark mode
       },
       items: [
         // Right side items in the order you want them to appear:
@@ -74,9 +94,15 @@ themes: [
         },
         {
           href: 'https://docs.objectbox.io/sync',
-          label: 'Sync Docs', 
+          label: 'Data Sync Docs', 
           position: 'right',
           //  target: '_self', // ← This prevents external link behavior
+        },
+        {
+          href: 'https://objectbox.io/blog/',
+          label: 'Blog',
+          position: 'right',
+          //target: '_self', // ← This prevents external link behavior
         },
         {
           href: 'https://twitter.com/objectbox_io',

@@ -1,13 +1,31 @@
 ---
-description: >-
-  The ObjectBox C / C ++ database is setup within minutes. Get the library and
-  the generator and start developing high performance data applications.
+title: "Install ObjectBox C++"
+description: "The ObjectBox C / C ++ database is setup within minutes. Get the library and the generator and start developing high performance data applications."
+keywords:
+  - objectbox
+  - c++
+  - cpp
+  - cmake
+  - database
+  - installation
 ---
+
 
 import Tabs from "@theme/Tabs"
 import TabItem from "@theme/TabItem"
 
 
+
+
+import { TechnicalArticleSchema } from '@site/src/components/Schema';
+
+<TechnicalArticleSchema
+  headline="Install ObjectBox C++"
+  description="The ObjectBox C / C ++ database is setup within minutes. Get the library and the generator and start developing high performance data applications."
+  url="https://cpp.objectbox.io/installation"
+  datePublished="2025-07-21"
+  dateModified="2025-07-21"
+/>
 
 # Installation
 
@@ -39,7 +57,10 @@ FetchContent_MakeAvailable(objectbox)
 
 add_executable(myapp main.cpp)
 target_link_libraries(myapp objectbox)
-```cmake
+```
+
+
+
 If you want to use an ObjectBox Sync variant of the library, change the `target_link_libraries` to:&#x20;
 
 ```cmake

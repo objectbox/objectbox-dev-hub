@@ -1,13 +1,31 @@
 ---
-description: >-
-  Learn how to create and update to-one and to-many relations between entities
-  in ObjectBox C / C++ database.
+title: "Relations in ObjectBox C++"
+description: "Learn how to create and update to-one and to-many relations between entities in ObjectBox C / C++ database."
+keywords:
+  - objectbox
+  - c++
+  - cpp
+  - cmake
+  - database
+  - relations
 ---
+
 
 import Tabs from "@theme/Tabs"
 import TabItem from "@theme/TabItem"
 
 
+
+
+import { TechnicalArticleSchema } from '@site/src/components/Schema';
+
+<TechnicalArticleSchema
+  headline="Relations in ObjectBox C++"
+  description="Learn how to create and update to-one and to-many relations between entities in ObjectBox C / C++ database."
+  url="https://cpp.objectbox.io/relations"
+  datePublished="2025-07-21"
+  dateModified="2025-07-21"
+/>
 
 # Relations
 
@@ -27,7 +45,7 @@ N:M (many-to-many): to-many relation with its backlink
 
 ## To-One Relations
 
-<img src=".gitbook/assets/spaces_-LETufmyus5LFkviJjr4_uploads_1fSQLwbLzX2umwPHx2o3_to-one-relations.webp" alt=""/><figcaption></figcaption>
+![](/img/assets/spaces_-LETufmyus5LFkviJjr4_uploads_1fSQLwbLzX2umwPHx2o3_to-one-relations.webp)
 
 ### To-One Relation Schema Definition
 
@@ -121,7 +139,7 @@ OBX_bytes_array* list = obx_query_find(query);
 
 ## Many-To-Many Relations
 
-<img src=".gitbook/assets/many-to-many.png" alt=""/><figcaption></figcaption>
+![](/img/assets/many-to-many.png)
 
 ### To-Many Relation Schema Definition
 

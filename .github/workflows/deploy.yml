@@ -36,3 +36,4 @@ jobs:
           protocol: ftps
           port: 21
           security: strict
+          options: set ftp:use-epsv no; # <-- ADD THIS LINE to force a more compatible transfer mode

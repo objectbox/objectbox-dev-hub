@@ -70,7 +70,7 @@ jobs:
 
           protocol: ftps-legacy                  # 👈 implicit FTPS
           port: 990
-          security: strict                       # 👈 keep strict TLS validation
+          security: strict                       # 👈 keep strict TLS
 
           local-dir: ./build/                    # must end with /
           server-dir: ${{ secrets.FTP_SERVER_DIR }} # 👈 secret, must end with /

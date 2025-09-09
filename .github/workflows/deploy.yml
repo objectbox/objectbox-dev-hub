@@ -36,4 +36,4 @@ jobs:
           protocol: ftps
           port: 21
           security: strict
-          options: set ftp:use-epsv no; # <-- ADD THIS LINE to force a more compatible transfer mode
+          timeout: 90000 # <-- ADD THIS LINE: Increase timeout to 90 seconds

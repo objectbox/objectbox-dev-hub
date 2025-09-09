@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
           local-dir: ./build/
-          server-dir: /dev.objectbox.io/  #<-- This is the updated path
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
           protocol: ftps
           port: 21
           security: strict

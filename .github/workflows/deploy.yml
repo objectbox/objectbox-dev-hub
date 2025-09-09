@@ -36,4 +36,5 @@ jobs:
           protocol: ftps
           port: 21
           security: strict
+          lftp-settings: set net:max-retries 2; set net:reconnect-interval-base 5;
           timeout: 90000 # <-- ADD THIS LINE: Increase timeout to 90 seconds

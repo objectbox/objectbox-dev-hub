@@ -12,6 +12,7 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,16 +28,29 @@ jobs:
           npm ci
           npm run build
 
-      - name: Deploy via FTPS (implicit, strict)
+      # --- Optional but recommended: prove strict TLS works on control+data before upload
+      - name: FTPS strict preflight (explicit/21, TLS1.2)
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y lftp
+          lftp -e "set net:timeout 20; set net:max-retries 1; \
+                   set ftp:ssl-allow yes; set ftp:ssl-force yes; \
+                   set ssl:verify-certificate yes; \
+                   set ssl:priority 'NORMAL:-VERS-TLS1.3'; \
+                   cd ${{ secrets.FTP_SERVER_DIR }}; pwd; \
+                   mkdir __gh_tls_strict__; rmdir __gh_tls_strict__; quit" \
+               -u '${{ secrets.FTP_USER }}','${{ secrets.FTP_PASS }}' \
+               -p 21 ftps://${{ secrets.FTP_HOST }}
+
+      - name: Deploy via FTPS (explicit, strict)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          server: ${{ secrets.FTP_HOST }}
+          server: ${{ secrets.FTP_HOST }}          # MUST be a hostname (CN/SAN must match)
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
-          protocol: ftps-legacy
-          port: 990
+          protocol: ftps                           # explicit FTPS
+          port: 21
           security: strict
-          local-dir: ./build/
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          local-dir: ./build/                      # trailing slash required
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}# trailing slash required
           log-level: verbose
           timeout: 120000

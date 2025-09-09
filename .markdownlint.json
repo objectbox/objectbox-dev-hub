@@ -1,0 +1,14 @@
+{
+  "plugins": [
+    ["remark-frontmatter", ["yaml"]],
+    "remark-gfm",
+    ["remark-lint", {}],
+
+    // Helpful checks
+    ["remark-lint-no-dead-urls", { "skipLocalhost": true, "skipOffline": true }],
+    ["remark-lint-no-duplicate-headings", false],
+
+    // Allow inline HTML because MDX uses components/HTML
+    ["remark-lint-no-html", false]
+  ]
+}

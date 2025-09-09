@@ -35,7 +35,7 @@ At the heart of the solution is a high-performance database, like ObjectBox, tha
 AI models can convert any multimodal data - e.g. an image of a pump, the text of a manual, a technical diagram, a product video - into a series of numbers (a multi-dimensional vector). These vectors (or "[vector embeddings](https://en.wikipedia.org/wiki/Embedding_(machine_learning))") represent the object's semantic meaning. Objects with similar meanings will be closer to each other in the vector space.
 :::
 
-**Instant, Offline Search**: The on-device database stores thousands or even millions of these vector fingerprints. When the technician snaps a photo, the app generates a new fingerprint and uses vector search to find the closest match in the local database instantly. This "Snap-to-Identify" feature works flawlessly, with zero reliance on the internet.
+**Instant, Offline Search**: The on-device database stores thousands or even millions of these vector embeddings. When the technician snaps a photo, the app generates a new vector embedding and uses vector search to find the closest match in the local database instantly. This "Snap-to-Identify" feature works flawlessly, with zero reliance on the internet.
 
 ### 2. The Game-Changer: Intelligent Data Synchronization
 
@@ -50,7 +50,7 @@ Let's revisit our utility company technician. The application she uses is a perf
 The company's central server is the "source of truth." When anything changes, Data Sync ensures the information automatically propagates to every technician.
 
 :::note Example: New Equipment
-100 new models of solar inverters are installed across the grid. Engineers add their photos and specs to the central database. The system generates vector embeddings. Overnight, when devices are charging on Wi-Fi, the sync seamlessly pushes these new assets and their vector fingerprints to every technician's local database.
+100 new models of solar inverters are installed across the grid. Engineers add their photos and specs to the central database. The system generates vector embeddings. Overnight, when devices are charging on Wi-Fi, the sync seamlessly pushes these new assets and their vector embeddings to every technician's local database.
 :::
 
 :::note Example: Updated Safety Protocols
@@ -73,10 +73,10 @@ Adopting an on-device vector database with data synchronization delivers transfo
 - **Flawless Offline-First Capability**: Core AI-driven features like visual search work anytime, anywhere, regardless of connectivity. This means zero downtime and maximum productivity.
 - **Real-Time Performance**: By eliminating network latency, searches and data lookups happen in milliseconds, not seconds, creating a fluid and responsive user experience.
 - **A Continuously Learning Ecosystem**: The two-way sync creates a powerful feedback loop. The system learns from real-world data gathered at the edge, constantly improving its accuracy and utility.
-- **Scalable and Resilient**: This architecture easily scales to thousands of devices without compromising performance, providing a robust foundation for mission-critical applications.
+- **Scalable Resilience**: This architecture easily scales to millions of devices without compromising performance, providing a robust foundation for mission-critical applications.
 :::
 
 ## Key Takeaway
 
-The future of intelligent applications isn't just in the cloud; it's in the seamless, symbiotic relationship between the cloud and the edge; especially for AI applications. By combining the local processing power of on-device vector search with the connective tissue of real-time data sync, we can build a new class of truly smart, resilient, and context-aware applications - that work offline as well as online and can support your workers anytime, anyplace in realtime. On top, this approach is way more resourceful, and therefore saves energy and thus monetary and environmental costs, while also empowering you to keep data secure and private on local devices, if that's needed.
+The future of intelligent applications isn't just in the cloud; it's in the seamless, symbiotic relationship between the cloud and the edge; especially for AI applications. By combining the local processing power of on-device vector search with the connective tissue of real-time data sync, we can build a new class of truly smart, resilient, and context-aware applications - that work offline as well as online and can support your workers anytime, anyplace in realtime. On top, this approach is way more resourceful, and therefore saves energy and thus monetary and environmental costs, while also empowering you to keep data secure and private on local devices.
 

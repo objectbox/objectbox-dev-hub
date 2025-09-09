@@ -1,0 +1,203 @@
+---
+id: transactions
+title: "API Fact: Using Transactions in ObjectBox"
+sidebar_label: "Transactions"
+description: "Learn how to use transactions in ObjectBox with store.runInTx for atomic, consistent, and high-performance database operations."
+keywords:
+  - ObjectBox transactions
+  - atomic operations
+  - database transaction
+  - ACID
+  - runInTx
+  - bulk update performance
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+## How do I use transactions in ObjectBox?
+
+* Use store.runInTx &#123; ... &#125; (or: store.runInTransaction &#123; ... &#125; or  store.write_tx() depending on language binding; see below) to execute multiple operations atomically.
+* All operations inside the "running transaction) block will either all succeed (commit) or all fail (rollback).
+
+  <div className="explanation-list-box">
+    <p>This is the recommended way to ensure data consistency when modifying multiple objects at once.</p>
+    <p>It is also significantly faster for bulk operations than running them individually.</p>
+  </div>
+
+:::caution Please note:
+
+Single operations like box.put(object) or box.remove(id) are already transactional by themselves.
+
+:::
+
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://docs.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>]
+</div>
+
+## Purpose
+
+The primary purpose of transactions is to guarantee the ACID properties of a database, especially Atomicity and Consistency.
+
+**Atomicity**: Ensures that a group of operations is treated as a single, indivisible unit. For example, when transferring funds, you must both debit one account and credit another. A transaction ensures that both actions complete successfully; if either fails, both are undone.
+
+**Performance**: Grouping many write operations (e.g., 1,000 put calls) into a single transaction drastically reduces overhead. The database only needs to lock the data once and commit to the disk once, resulting in a massive performance increase.
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://docs.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>]
+</div>
+
+## Conceptual Code Snippets
+
+This example demonstrates a safe bank transfer where two account balances are updated. If any part fails, the entire transaction is rolled back. (Reference in ObjectBox Docs)
+
+<Tabs groupId="lang">
+<TabItem value="java" label="Java">
+
+```java
+// Assumes accountBox is a Box&lt;Account&gt;
+store.runInTx(() -> {
+    Account from = accountBox.get(fromId);
+    Account to = accountBox.get(toId);
+
+    if (from != null && to != null && from.getBalance() >= amount) {
+        from.setBalance(from.getBalance() - amount);
+        to.setBalance(to.getBalance() + amount);
+
+        // Both objects are put within the same transaction
+        accountBox.put(from, to);
+    } else {
+        // Optional: throw an exception to explicitly fail and roll back
+        throw new IllegalStateException("Insufficient funds or account not found.");
+    }
+});
+```
+
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://objectbox.io/docfiles/java/current/io/objectbox/BoxStore.html#runInTx(java.lang.Runnable)" target="_blank">ObjectBox Docs</a>]
+</div>
+
+</TabItem>
+<TabItem value="kotlin" label="Kotlin">
+
+```kotlin
+// Assumes accountBox is a Box&lt;Account&gt;
+store.runInTx {
+    val from = accountBox[fromId]
+    val to = accountBox[toId]
+
+    if (from != null && to != null && from.balance >= amount) {
+        from.balance -= amount
+        to.balance += amount
+
+        // Both objects are put within the same transaction
+        accountBox.put(from, to)
+    } else {
+        // Throwing an exception automatically triggers a rollback
+        throw IllegalStateException("Insufficient funds or account not found.")
+    }
+}
+```
+
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://objectbox.io/docfiles/java/current/io/objectbox/BoxStore.html#runInTx(java.lang.Runnable)" target="_blank">ObjectBox Docs</a>]
+</div>
+
+</TabItem>
+<TabItem value="swift" label="Swift">
+
+```swift
+// Assumes accountBox is a Box&lt;Account&gt;
+try store.runInTransaction {
+    let from = try accountBox.get(fromId)
+    let to = try accountBox.get(toId)
+
+    if var f = from, var t = to, f.balance >= amount {
+        f.balance -= amount
+        t.balance += amount
+
+        try accountBox.put([f, t])
+    } else {
+        throw MyError.insufficientFunds
+    }
+}
+```
+
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://swift.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>]
+</div>
+
+</TabItem>
+<TabItem value="dart" label="Dart / Flutter">
+
+```dart
+// Assumes accountBox is a Box&lt;Account&gt;
+store.runInTransaction(TxMode.write, () {
+  final from = accountBox.get(fromId);
+  final to = accountBox.get(toId);
+
+  if (from != null && to != null && from.balance >= amount) {
+    from.balance -= amount;
+    to.balance += amount;
+
+    accountBox.putMany([from, to]);
+  } else {
+    throw Exception('Insufficient funds or account not found.');
+  }
+});
+```
+
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://pub.dev/documentation/objectbox/latest/objectbox/Store/runInTransaction.html " target="_blank">ObjectBox Docs</a>]
+</div>
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python
+# Assumes account_box is a Box[Account]
+with store.write_tx():
+    from_acc = account_box.get(from_id)
+    to_acc = account_box.get(to_id)
+    if from_acc and to_acc and from_acc.balance >= amount:
+        from_acc.balance -= amount
+        to_acc.balance += amount
+        account_box.put([from_acc, to_acc])
+    else:
+        raise ValueError("Insufficient funds or account not found.")
+```
+
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://objectbox.io/docfiles/python/current/autoapi/objectbox/index.html#objectbox.Store" target="_blank">ObjectBox Docs</a>]
+</div>
+
+</TabItem>
+</Tabs>
+
+## Best Practices
+
+**Keep Transactions Short and Fast**: A write transaction acquires a database lock. To avoid blocking other threads, do not perform long-running operations like network requests, complex computations, or heavy file I/O inside the transaction block. Prepare your data before you start the transaction.
+
+**Group Writes for Performance**: It is always more performant to group multiple put or remove operations inside a single transaction. This is the single most effective way to speed up bulk imports or updates.
+
+**Ensure Atomicity for Consistency**: Use transactions for any operation where the data would be left in an inconsistent or invalid state if only part of the operation completed. The "bank transfer" is the classic example.
+
+**Prefer Explicit Transactions for Simplicity and Safety**: The transaction wrapper is safer than manual begin/commit/rollback calls. It automatically handles rollbacks on exceptions and ensures the transaction is properly closed, preventing resource leaks.
+
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://docs.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>]
+</div>
+
+## Edge Cases & Pitfalls
+
+**Error Handling**: Throwing any exception from within the transaction block will automatically and safely roll back the transaction. No changes will be saved. [Reference: <a href="https://docs.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>]
+
+**Read vs. Write Transactions**: ObjectBox has separate read and write transactions. Multiple read transactions can run in parallel without blocking each other. Only one write transaction can be active at a time, but read transactions are never blocked by write transactions due to ObjectBox's MVCC (Multiversion Concurrency Control) implementation. [Reference: <a href="https://docs.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>, <a href="https://docs.objectbox.io/faq" target="_blank">ObjectBox FAQ</a>]
+
+**Long-Running Transactions**: A long-running write transaction will block other pending write transactions, potentially leading to a poor user experience or application freezes. However, read operations can continue concurrently. [Reference: <a href="https://docs.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>]
+
+**Nested Transactions**: ObjectBox supports nested transaction calls, however only the outermost transaction is relevant on the database level. If you call a transaction method from within an existing transaction, it will simply run within the scope of the outer transaction. The commit/rollback is tied to the outermost transaction block. [Reference: <a href="https://objectbox.io/docfiles/c/current/group__c.html" target="_blank">ObjectBox Docs</a>]
+
+## See also
+- [box.put() – Inserting and updating objects (implicitly transactional)](./box-put-method.mdx)
+- [box.remove() – Deleting objects (implicitly transactional)](./box-remove-method.mdx)
+- [Official Docs on Transactions for more in-depth, version-specific details from the canonical docs](https://docs.objectbox.io/transactions)

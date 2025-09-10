@@ -61,7 +61,7 @@ const config: Config = {
           filename: 'sitemap.xml',
         },
         gtag: {
-          trackingID: 'G-XXXXXXXXXX', // needs changing!
+          trackingID: 'G-V7H0V86MES', 
           anonymizeIP: true,
         },
       } satisfies Preset.Options,

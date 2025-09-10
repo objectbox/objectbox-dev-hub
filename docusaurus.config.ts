@@ -47,7 +47,8 @@ const config: Config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.ts'),
-          editUrl: 'https://github.com/objectbox/objectbox-dev-site/blob/main/', // needs changing!
+          editUrl: 'https://github.com/objectbox/objectbox-dev-site/edit/main/',
+
         },
         blog: false,
         theme: {
@@ -73,7 +74,7 @@ const config: Config = {
       title: 'How to use ObjectBox for Edge AI, Mobile AI, Embedded AI, and Offline Apps with real-time sync in any setting',
       logo: {
         alt: 'ObjectBox Logo',
-        src: 'img/objectbox-logo.jpg',
+        src: 'img/objectbox-logo-rect.jpg',
         srcDark: 'img/objectbox-logo-dm.png',
       },
       items: [

@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'ObjectBox for Embedded AI, Mobile AI, Edge AI & Offline-First Apps',
-  tagline: 'How to use ObjectBox for Edge AI, Mobile AI, Embedded AI, and Offline Apps',
+  tagline: 'Dev-TidBits around Edge AI, Databases, Data Sync',
   favicon: 'img/favicon.ico',
 
   url: 'https://dev.objectbox.io',

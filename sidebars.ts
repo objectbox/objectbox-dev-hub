@@ -8,7 +8,6 @@ const sidebars: SidebarsConfig = {
       label: 'Core Concepts',
       items: [
         'data-modeling-offline-first-apps',
-        'transactions',
       ],
     },
     {
@@ -18,6 +17,7 @@ const sidebars: SidebarsConfig = {
         'box-get-method',
         'box-put-method',
         'box-remove-method',
+        'transactions',
       ],
     },
     {
@@ -33,6 +33,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Edge AI Use Cases',
       items: [
+        'edge-computing-edge-ai-local-ai-marketanalysis',
         'on-device-vector-database-sync',
       ],
     },

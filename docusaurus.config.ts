@@ -7,7 +7,7 @@ const config: Config = {
   tagline: 'Dev-TidBits around Edge AI, Databases, Data Sync',
   favicon: 'img/favicon.ico',
 
-  url: 'https://dev.objectbox.io',
+  url: ' https://objectbox.io/dev-how-to',
   baseUrl: '/',
 
   organizationName: 'objectbox',

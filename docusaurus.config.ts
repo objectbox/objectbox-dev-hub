@@ -71,7 +71,7 @@ const config: Config = {
   themeConfig: {
     image: 'img/objectbox-social-card.jpg',
     navbar: {
-      title: 'How to use ObjectBox for Edge AI, Mobile AI, Embedded AI, and Offline Apps with real-time sync in any setting',
+      title: 'Dev TidBits and How-tos around Edge AI, Databases, Data Sync',
       logo: {
         alt: 'ObjectBox Logo',
         src: 'img/objectbox-logo-rect.jpg',

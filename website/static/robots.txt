@@ -16,4 +16,8 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 
+# AI-Optimized Content Available
+# Raw markdown (10x token savings): /api/raw?path={doc-path}
+# GitHub raw files: https://raw.githubusercontent.com/objectbox/objectbox-dev-hub/mdx/website/docs/{doc-path}.mdx
+
 Sitemap: https://objectbox.io/dev-how-to/sitemap.xml

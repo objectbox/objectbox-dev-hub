@@ -1,113 +1,216 @@
 ---
-title: "Transactions in ObjectBox C++"
-description: "The ObjectBox database is transactional and fully ACID compliant. ObjectBox gives developers Multiversion concurrency control (MVCC) semantics."
+id: transactions
+title: "API Fact: Using Transactions in ObjectBox"
+sidebar_label: "Transactions"
+description: "Learn how to use transactions in ObjectBox with store.runInTx for atomic, consistent, and high-performance database operations."
 keywords:
-  - objectbox
-  - c++
-  - cpp
-  - cmake
-  - database
-  - transactions
+  - ObjectBox transactions
+  - atomic operations
+  - database transaction
+  - ACID
+  - runInTx
+  - bulk update performance
+image: /img/social/api-fact-using-transactions-in-objectbox.jpg
 ---
+import Head from '@docusaurus/Head';
 
 
-import Tabs from "@theme/Tabs"
-import TabItem from "@theme/TabItem"
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
+## How do I use transactions in ObjectBox?
 
+* Use store.runInTx &#123; ... &#125; (or: store.runInTransaction &#123; ... &#125; or  store.write_tx() depending on language binding; see below) to execute multiple operations atomically.
+* All operations inside the "running transaction) block will either all succeed (commit) or all fail (rollback).
 
+  <div className="explanation-list-box">
+    <p>This is the recommended way to ensure data consistency when modifying multiple objects at once.</p>
+    <p>It is also significantly faster for bulk operations than running them individually.</p>
+  </div>
 
-import { TechnicalArticleSchema } from '@site/src/components/Schema';
+:::caution Please note:
 
-<TechnicalArticleSchema
-  headline="Transactions in ObjectBox C++"
-  description="The ObjectBox database is transactional and fully ACID compliant. ObjectBox gives developers Multiversion concurrency control (MVCC) semantics."
-  url="https://cpp.objectbox.io/transactions"
-  datePublished="2025-07-21"
-  dateModified="2025-07-21"
-/>
+Single operations like box.put(object) or box.remove(id) are already transactional by themselves.
 
-# Transactions
-
-The ObjectBox database is transactional and fully ACID compliant. ObjectBox gives developers Multiversion concurrency control (MVCC) semantics.
-
-
-## What is a database transaction?
-
-A transaction groups several operations into a unit of work. This unit of work (transaction) can either execute completely or not at all, but it cannot be "half-completed". Thus, you always know the status of your data. By definition a transaction must be ACID: A = [atomic](https://en.wikipedia.org/wiki/Atomicity\_\(database\_systems\)) (either entirely completed or without any effect), [consistent](https://en.wikipedia.org/wiki/Consistency\_\(database\_systems\)) (conforming to existing constraints in the database), [isolated](https://en.wikipedia.org/wiki/Isolation\_\(database\_systems\)) (not affecting other transactions) and [durable](https://en.wikipedia.org/wiki/Durability\_\(database\_systems\)) (persisted). This definition is based on Wikipedia, where you can dive deeper on [database transactions](https://en.wikipedia.org/wiki/Database\_transaction), if that is what you are looking for.&#x20;
-
-## **ObjectBox is transactionally safe**
-
-Nearly all interactions with ObjectBox involve transactions, e.g. when you call Box `put()` a write transaction is used. Or for example, a read transaction is used, when you `count()` objects in a box. All of this is transparent to you, while you don't need to take care of it yourself.
-
-In C++, it may be fine to completely ignore transactions altogether in your app without running into any problems. In C, you will need to use explicit transactions in some situations, such as reading objects.
-
-Understanding the transaction basics can help you to make your app more consistent and efficient, especially if you are working on a complex application.
-
-### Explicit transactions
-
-An implicit transaction is a transaction that is started automatically. An explicit one is started by a call to `store.tx()/obx_txn_write(store)`and is active until marked successful or aborted. By default, all Box operations run in implicit transactions unless an explicit transaction is in progress on the same thread. In the latter case, multiple operations share the (explicit) transaction. This means:
-
-:::info
-With explicit transactions, you control the transaction boundary. You can use this to improve efficiency and consistency in your app.
 :::
 
-Advantages of explicit database transactions:
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://docs.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>]
+</div>
 
-* you can perform any number of operations and use objects of multiple boxes, while having a consistent view of the data,
-* running multiple updates/inserts is faster because it doesn't involve starting an implicit transaction each time,
-* being able to "roll-back" a transaction when an error occurs, potentially discarding changes from multiple updates.
+## Purpose
 
-Example for a write transaction which just inserts 1 000 000 objects (assumes an opened store & box):
+The primary purpose of transactions is to guarantee the ACID properties of a database, especially Atomicity and Consistency.
 
-<Tabs>
-<TabItem value="cpp" label="C++">
+**Atomicity**: Ensures that a group of operations is treated as a single, indivisible unit. For example, when transferring funds, you must both debit one account and credit another. A transaction ensures that both actions complete successfully; if either fails, both are undone.
 
-```cpp
-obx::Transaction tx = store.txWrite();
-for (int i = 1000000; i > 0; i--) {
-    box.put({});
-}
-tx.success();
+**Performance**: Grouping many write operations (e.g., 1,000 put calls) into a single transaction drastically reduces overhead. The database only needs to lock the data once and commit to the disk once, resulting in a massive performance increase.
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://docs.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>]
+</div>
+
+## Conceptual Code Snippets
+
+This example demonstrates a safe bank transfer where two account balances are updated. If any part fails, the entire transaction is rolled back. (Reference in ObjectBox Docs)
+
+<Tabs groupId="lang">
+<TabItem value="java" label="Java">
+
+```java
+// Assumes accountBox is a Box&lt;Account&gt;
+store.runInTx(() -> {
+    Account from = accountBox.get(fromId);
+    Account to = accountBox.get(toId);
+
+    if (from != null && to != null && from.getBalance() >= amount) {
+        from.setBalance(from.getBalance() - amount);
+        to.setBalance(to.getBalance() + amount);
+
+        // Both objects are put within the same transaction
+        accountBox.put(from, to);
+    } else {
+        // Optional: throw an exception to explicitly fail and roll back
+        throw new IllegalStateException("Insufficient funds or account not found.");
+    }
+});
 ```
+
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://objectbox.io/docfiles/java/current/io/objectbox/BoxStore.html#runInTx(java.lang.Runnable)" target="_blank">ObjectBox Docs</a>]
+</div>
 
 </TabItem>
-<TabItem value="c" label="C">
+<TabItem value="kotlin" label="Kotlin">
 
-```c
-OBX_txn* tx = obx_txn_write(store);
-for (int i = 1000000; i > 0; i--) {
-    ... flatbuffers serialization here, producing data & size variables ...
-    obx_box_put_object(box, data, size, OBXPutMode_PUT);
+```kotlin
+// Assumes accountBox is a Box&lt;Account&gt;
+store.runInTx {
+    val from = accountBox[fromId]
+    val to = accountBox[toId]
+
+    if (from != null && to != null && from.balance >= amount) {
+        from.balance -= amount
+        to.balance += amount
+
+        // Both objects are put within the same transaction
+        accountBox.put(from, to)
+    } else {
+        // Throwing an exception automatically triggers a rollback
+        throw IllegalStateException("Insufficient funds or account not found.")
+    }
 }
-obx_txn_success(txn); 
-
-// don't forget to check results of all the C-API calls
 ```
+
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://objectbox.io/docfiles/java/current/io/objectbox/BoxStore.html#runInTx(java.lang.Runnable)" target="_blank">ObjectBox Docs</a>]
+</div>
+
+</TabItem>
+<TabItem value="swift" label="Swift">
+
+```swift
+// Assumes accountBox is a Box&lt;Account&gt;
+try store.runInTransaction {
+    let from = try accountBox.get(fromId)
+    let to = try accountBox.get(toId)
+
+    if var f = from, var t = to, f.balance >= amount {
+        f.balance -= amount
+        t.balance += amount
+
+        try accountBox.put([f, t])
+    } else {
+        throw MyError.insufficientFunds
+    }
+}
+```
+
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://swift.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>]
+</div>
+
+</TabItem>
+<TabItem value="dart" label="Dart / Flutter">
+
+```dart
+// Assumes accountBox is a Box&lt;Account&gt;
+store.runInTransaction(TxMode.write, () {
+  final from = accountBox.get(fromId);
+  final to = accountBox.get(toId);
+
+  if (from != null && to != null && from.balance >= amount) {
+    from.balance -= amount;
+    to.balance += amount;
+
+    accountBox.putMany([from, to]);
+  } else {
+    throw Exception('Insufficient funds or account not found.');
+  }
+});
+```
+
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://pub.dev/documentation/objectbox/latest/objectbox/Store/runInTransaction.html " target="_blank">ObjectBox Docs</a>]
+</div>
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python
+# Assumes account_box is a Box[Account]
+with store.write_tx():
+    from_acc = account_box.get(from_id)
+    to_acc = account_box.get(to_id)
+    if from_acc and to_acc and from_acc.balance >= amount:
+        from_acc.balance -= amount
+        to_acc.balance += amount
+        account_box.put([from_acc, to_acc])
+    else:
+        raise ValueError("Insufficient funds or account not found.")
+```
+
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://objectbox.io/docfiles/python/current/autoapi/objectbox/index.html#objectbox.Store" target="_blank">ObjectBox Docs</a>]
+</div>
 
 </TabItem>
 </Tabs>
 
-Understanding transactions is essential to mastering the database performance. If you just remember one sentence on this topic, it should be this one: a write transaction has its price, and it's the same whether it's implicit or explicit.
+## Best Practices
 
-Committing a transaction involves syncing data to physical storage, which is a relatively expensive operation for databases. Only when the file system confirms that all data has been stored in a durable manner (not just memory cached), the transaction can be considered successful. This file sync required by a transaction may take a couple of milliseconds. Keep this in mind and try to group several operations (e.g.`put`calls) in one transaction.
+**Keep Transactions Short and Fast**: A write transaction acquires a database lock. To avoid blocking other threads, do not perform long-running operations like network requests, complex computations, or heavy file I/O inside the transaction block. Prepare your data before you start the transaction.
 
-### Read Transactions
+**Group Writes for Performance**: It is always more performant to group multiple put or remove operations inside a single transaction. This is the single most effective way to speed up bulk imports or updates.
 
-In ObjectBox, read transactions are very cheap. Unlike write transactions, there is no commit and thus no expensive sync to the file system. Operations like `get` , `count` , and queries run inside an implicit read transaction if they are not called when already inside an explicit transaction (read or write). Note that it is illegal to `put` (or do any other write operation) when inside a read transaction.
+**Ensure Atomicity for Consistency**: Use transactions for any operation where the data would be left in an inconsistent or invalid state if only part of the operation completed. The "bank transfer" is the classic example.
 
-While read transactions are cheaper than write transactions, there is still some overhead to start one. Thus, for a high number of reads (e.g. hundreds, in a loop), you can improve performance by grouping those reads in a single read transaction (see explicit transactions above).
+**Prefer Explicit Transactions for Simplicity and Safety**: The transaction wrapper is safer than manual begin/commit/rollback calls. It automatically handles rollbacks on exceptions and ensures the transaction is properly closed, preventing resource leaks.
 
-### Multiversion concurrency
+<div style={{textAlign: 'right'}}>
+[Reference: <a href="https://docs.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>]
+</div>
 
-ObjectBox gives developers [Multiversion concurrency control (MVCC)](https://en.wikipedia.org/wiki/Multiversion\_concurrency\_control) semantics. This allows multiple concurrent readers (read transactions) which can execute immediately without blocking or waiting. This is guaranteed by storing multiple versions of (committed) data. Even if a write transaction is in progress, a read transaction can read the last consistent state immediately. Write transactions are executed sequentially to ensure a consistent state. Thus, it is advised to keep write transactions short to avoid blocking other pending write transactions. For example, it is usually a bad idea to do networking or complex calculations while inside a write transaction. Instead, do any expensive operation and prepare objects before entering a write transaction.
+## Edge Cases & Pitfalls
 
-Note that you do not have to worry about making write transactions sequential yourself. If multiple threads want to write at the same time, one of the threads will be selected to go first, while the other threads have to wait. It works just like mutex locks.
+**Error Handling**: Throwing any exception from within the transaction block will automatically and safely roll back the transaction. No changes will be saved. [Reference: <a href="https://docs.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>]
 
-#### Locking inside a Write Transaction
+**Read vs. Write Transactions**: ObjectBox has separate read and write transactions. Multiple read transactions can run in parallel without blocking each other. Only one write transaction can be active at a time, but read transactions are never blocked by write transactions due to ObjectBox's MVCC (Multiversion Concurrency Control) implementation. [Reference: <a href="https://docs.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>, <a href="https://docs.objectbox.io/faq" target="_blank">ObjectBox FAQ</a>]
 
-:::danger
-Avoid locking (e.g. with a mutex) when inside a write transaction when possible.
-:::
+**Long-Running Transactions**: A long-running write transaction will block other pending write transactions, potentially leading to a poor user experience or application freezes. However, read operations can continue concurrently. [Reference: <a href="https://docs.objectbox.io/transactions" target="_blank">ObjectBox Docs</a>]
 
-Because write transactions run exclusively, they effectively acquire a write lock internally. As with all locks, you need to pay close attention when multiple locks are involved. Always obtain locks in the same order to avoid deadlocks. If you acquire a lock “X” inside a transaction, you must ensure that your code does not start another write transaction while having the same lock “X”.
+**Nested Transactions**: ObjectBox supports nested transaction calls, however only the outermost transaction is relevant on the database level. If you call a transaction method from within an existing transaction, it will simply run within the scope of the outer transaction. The commit/rollback is tied to the outermost transaction block. [Reference: <a href="https://objectbox.io/docfiles/c/current/group__c.html" target="_blank">ObjectBox Docs</a>]
+
+## See also
+- [box.put() – Inserting and updating objects (implicitly transactional)](./box-put-method.mdx)
+- [box.remove() – Deleting objects (implicitly transactional)](./box-remove-method.mdx)
+- [Official Docs on Transactions for more in-depth, version-specific details from the canonical docs](https://docs.objectbox.io/transactions)
+
+<Head>
+  <meta property="og:title" content="API Fact: Using Transactions in ObjectBox" />
+  <meta property="og:description" content="Learn how to use transactions in ObjectBox with store.runInTx for atomic, consistent, and high-performance database operations." />
+  <meta property="og:image" content="https://objectbox.io/dev-how-to/img/social/api-fact-using-transactions-in-objectbox.jpg" />
+  <meta property="og:type" content="article" />
+  <script type="application/ld+json">
+    {JSON.stringify({"@context": "https://schema.org", "@type": "TechArticle", "mainEntityOfPage": {"@type": "WebPage", "@id": "https://dev.objectbox.io/api-facts/transactions"}, "headline": "API Fact: Using Transactions in ObjectBox", "description": "Learn how to use transactions in ObjectBox with store.runInTx for atomic, consistent, and high-performance database operations.", "keywords": "ObjectBox transactions, atomic operations, database transaction, ACID, runInTx, bulk update performance", "datePublished": "2025-05-20T11:00:00+02:00", "dateModified": "2025-09-10T09:15:00+02:00", "author": {"@type": "Organization", "name": "ObjectBox", "url": "https://dev.objectbox.io/"}}, null, 2)}
+  </script>
+</Head>

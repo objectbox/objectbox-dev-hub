@@ -918,3 +918,142 @@ div[class*="docPage"] {
   }
 }
 
+/* ===== CUSTOM ADMONITION COLORS ===== */
+
+/* Info admonition - Blue (#2A3850) */
+.alert--info {
+  --ifm-alert-background-color: rgba(42, 56, 80, 0.1) !important;
+  --ifm-alert-background-color-highlight: rgba(42, 56, 80, 0.15) !important;
+  --ifm-alert-foreground-color: #2A3850 !important;
+  --ifm-alert-border-color: #2A3850 !important;
+}
+
+/* Tip admonition - Teal (#17A6A6) */
+.alert--tip {
+  --ifm-alert-background-color: rgba(23, 166, 166, 0.1) !important;
+  --ifm-alert-background-color-highlight: rgba(23, 166, 166, 0.15) !important;
+  --ifm-alert-foreground-color: #17A6A6 !important;
+  --ifm-alert-border-color: #17A6A6 !important;
+}
+
+/* Warning admonition - Orange (#F5962D) */
+.alert--warning {
+  --ifm-alert-background-color: rgba(245, 150, 45, 0.1) !important;
+  --ifm-alert-background-color-highlight: rgba(245, 150, 45, 0.15) !important;
+  --ifm-alert-foreground-color: #F5962D !important;
+  --ifm-alert-border-color: #F5962D !important;
+}
+
+/* Note admonition - Keep using blue like info */
+.alert--note {
+  --ifm-alert-background-color: rgba(42, 56, 80, 0.1) !important;
+  --ifm-alert-background-color-highlight: rgba(42, 56, 80, 0.15) !important;
+  --ifm-alert-foreground-color: #2A3850 !important;
+  --ifm-alert-border-color: #2A3850 !important;
+}
+
+/* Success/Caution admonitions - Keep existing colors but ensure consistency */
+.alert--success {
+  --ifm-alert-background-color: rgba(0, 164, 0, 0.1) !important;
+  --ifm-alert-background-color-highlight: rgba(0, 164, 0, 0.15) !important;
+  --ifm-alert-foreground-color: #17A6A6 !important;
+  --ifm-alert-border-color: #17A6A6 !important;
+}
+
+.alert--caution {
+  --ifm-alert-background-color: rgba(255, 230, 0, 0.1) !important;
+  --ifm-alert-background-color-highlight: rgba(255, 230, 0, 0.15) !important;
+  --ifm-alert-foreground-color: #e6a700 !important;
+  --ifm-alert-border-color: #e6a700 !important;
+}
+
+/* Dark mode adjustments for custom admonition colors */
+[data-theme='dark'] .alert--info {
+  --ifm-alert-background-color: rgba(42, 56, 80, 0.2) !important;
+  --ifm-alert-background-color-highlight: rgba(42, 56, 80, 0.25) !important;
+}
+
+[data-theme='dark'] .alert--tip {
+  --ifm-alert-background-color: rgba(23, 166, 166, 0.2) !important;
+  --ifm-alert-background-color-highlight: rgba(23, 166, 166, 0.25) !important;
+}
+
+[data-theme='dark'] .alert--warning {
+  --ifm-alert-background-color: rgba(245, 150, 45, 0.2) !important;
+  --ifm-alert-background-color-highlight: rgba(245, 150, 45, 0.25) !important;
+}
+
+[data-theme='dark'] .alert--note {
+  --ifm-alert-background-color: rgba(42, 56, 80, 0.2) !important;
+  --ifm-alert-background-color-highlight: rgba(42, 56, 80, 0.25) !important;
+}
+
+/* === Uniform Markdown table styling === */
+.markdown table {
+  width: 100%;               /* always take full width */
+  table-layout: fixed;       /* distribute columns evenly */
+  border-collapse: collapse; /* cleaner look */
+  margin: 1em 0;
+}
+
+.markdown table th,
+.markdown table td {
+  padding: 0.6em 0.8em;
+  border: 1px solid var(--ifm-table-border-color);
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;       /* wrap long code/text */
+  word-break: break-word;
+}
+
+.markdown table th {
+  background-color: var(--ifm-table-head-bg);
+  font-weight: 600;
+}
+
+/* Equal-width API mapping tables (only affects .api-table wrappers) */
+.api-table table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+.api-table th,
+.api-table td {
+  width: 33.333%;
+  padding: 0.6em 0.8em;
+  border: 1px solid var(--ifm-table-border-color);
+  vertical-align: top;
+  text-align: left;
+  white-space: normal;
+  word-break: break-word;
+}
+.api-table th {
+  background-color: var(--ifm-table-head-bg);
+  font-weight: 600;
+}
+.api-table td code {
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* ===== EXPLANATION BOX FOR LIST ITEMS ===== */
+.explanation-list-box {
+  background-color: #fafafa; /* A very light grey */
+  border: 1px solid #e0e0e0;
+  border-left: 3px solid #cccccc;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  font-size: 0.9em; /* Slightly smaller text */
+  color: #444; /* Dark grey text for readability */
+}
+
+.explanation-list-box p {
+  margin: 0 0 0.5rem 0; /* Spacing for paragraphs inside the box */
+}
+
+.explanation-list-box p:last-child {
+  margin-bottom: 0;
+}

@@ -21,6 +21,10 @@ const config: Config = {
     locales: ['en'],
   },
 
+  plugins: [
+    './plugins/ai-markdown-plugin.js',
+  ],
+
   themes: [
     [
       '@easyops-cn/docusaurus-search-local',

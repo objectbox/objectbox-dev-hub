@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\Users\\Vivien\\dev-hub\\website\\docs/**)",
+      "Read(/C:\\Users\\Vivien\\dev-hub\\website\\docs/**)",
+      "Read(/C:\\Users\\Vivien\\dev-hub\\website\\docs/**)",
+      "Read(/C:\\Users\\Vivien\\dev-hub\\website\\docs/**)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git stash:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

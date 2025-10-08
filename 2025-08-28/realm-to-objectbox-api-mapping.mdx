@@ -1,0 +1,105 @@
+---
+id: realm-to-objectbox-api-mapping
+title: "Realm → ObjectBox API Mapping"
+sidebar_label: "Realm → ObjectBox mapping"
+description: "Quick reference mapping Realm APIs to ObjectBox equivalents across languages."
+slug: /migrate/realm-to-objectbox/api-mapping
+keywords: [ObjectBox, Realm, migration, API mapping, reference]
+---
+
+# Realm → ObjectBox API Mapping
+
+This quick reference helps you translate common Realm APIs and concepts to ObjectBox equivalents. Use it during migrations together with the full Migration Guide.
+
+> **Note**: Names vary across language bindings (Java/Kotlin, Swift, Dart, Python). When in doubt, check the binding’s reference.
+
+## Entities / Models
+
+<div className="api-table cols-3">
+
+| Concept | Realm | ObjectBox |
+|---|---|---|
+| Define entity/model | `open class Note : RealmObject()` | `@Entity class Note { @Id var id: Long = 0 }` |
+| Primary key / ID | `@PrimaryKey var id: Long = 0` | `@Id var id: Long = 0` (auto-assigned on insert unless assignable) |
+| Index | `@Index` | `@Index` |
+| Ignore field | `@Ignore` | `@Transient` / binding-specific |
+
+</div>
+
+## Create / Update
+
+<div className="api-table cols-3">
+
+| Task | Realm | ObjectBox |
+|---|---|---|
+| Insert | `realm.write { copyToRealm(obj) }` | `box.put(obj)` |
+| Insert many | `realm.write { copyToRealm(items) }` | `box.put(items)` (single TX) |
+| Update (by ID) | `write { findLatest(obj)?.apply{…} }` | `box.put(obj)` (same ID) |
+
+</div>
+
+:::tip IDs 101
+By default, ObjectBox assigns IDs on insert (`id == 0`).  
+If you need to set IDs yourself, mark the ID as **assignable** in your binding  
+(e.g., `@Id(assignable = true)` in Java/Kotlin) and ensure uniqueness before `put()`.
+:::
+
+## Read
+
+<div className="api-table cols-3">
+
+| Task | Realm | ObjectBox |
+|---|---|---|
+| Get by ID | `realm.query<Note>("id == $0", id).first().find()` | `box.get(id)` |
+| Get multiple by IDs | Filter with `IN` | Java/Kotlin: `box.get(long[] ids)`; Dart: `getMany(ids)` |
+| Query by field | `realm.query<Note>("title == $0", "x")` | Build a query with conditions (binding API) |
+
+</div>
+
+## Delete
+
+<div className="api-table cols-3">
+
+| Task | Realm | ObjectBox |
+|---|---|---|
+| Delete by object | `write { delete(obj) }` | `box.remove(obj)` |
+| Delete by ID | `write { findLatest(obj)?.let{ delete(it) } }` | `box.remove(id)` (returns boolean) |
+| Delete many | `write { delete(query.find()) }` | `box.remove(ids or collection)` (use a TX) |
+
+</div>
+
+## Relations
+
+<div className="api-table cols-3">
+
+| Type | Realm | ObjectBox |
+|---|---|---|
+| 1:1 | Field reference | Relation field or ID reference |
+| 1:n | `RealmList<T>` | `ToMany<T>` / relation list |
+| m:n | Two `RealmList`s or link objects | Relation entity or reciprocal `ToMany` (binding-specific) |
+
+</div>
+
+## Transactions
+
+<div className="api-table cols-3">
+
+| Task | Realm | ObjectBox |
+|---|---|---|
+| Run in TX | `realm.write { … }` | `store.runInTx { … }` |
+| Read-only TX | `realm.read { … }` | Implicit for single ops; explicit TX optional |
+
+</div>
+
+## Vector / Similarity Search (if applicable)
+
+If your migration targets vector/similarity search, ObjectBox supports **on-device vector indexing** with HNSW in supported bindings. Check the binding documentation for APIs and constraints.
+
+---
+
+## See also
+- [Realm → ObjectBox Migration Guide](./realm-to-objectbox-migration.mdx)
+- [Transactions](./transactions.mdx)
+- [box.put()](./box-put-method.mdx)
+- [box.get()](./box-get-method.mdx)
+- [box.remove()](./box-remove-method.mdx)

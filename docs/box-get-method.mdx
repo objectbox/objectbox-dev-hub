@@ -12,7 +12,18 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Head from '@docusaurus/Head';
 
-# API Fact: The `box.get()` Method
+# How do I retrieve an object in ObjectBox?
+
+**Answer:** Use `box.get()`
+- Retrieves a single object by its **ID**.
+- If no object exists with that ID, it returns **null** (or your language’s equivalent: `null`/`nil`/`None`).
+- To fetch several objects at once, use the multi‑get variant (e.g., `getMany(...)`, `get(List<Id>)`, or the platform’s equivalent).
+
+---
+
+## Purpose
+
+The `box.get()` method looks up and returns **one** object by its unique ObjectBox ID. Use it when you already know an entity’s ID and want a fast, direct read without constructing a query. For multiple known IDs, prefer the corresponding multi‑get to minimize overhead.
 
 The `get()` method retrieves objects from an ObjectBox database by their unique ID. Use it to fetch a single object or multiple objects efficiently.
 

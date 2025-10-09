@@ -20,6 +20,8 @@ import TabItem from '@theme/TabItem';
 
 ## How do I use transactions in ObjectBox?
 
+
+**Answer:** 
 * Use store.runInTx &#123; ... &#125; (or: store.runInTransaction &#123; ... &#125; or  store.write_tx() depending on language binding; see below) to execute multiple operations atomically.
 * All operations inside the "running transaction) block will either all succeed (commit) or all fail (rollback).
 

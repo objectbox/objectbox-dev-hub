@@ -1,0 +1,89 @@
+---
+id: realm-to-objectbox-api-mapping
+title: "Realm → ObjectBox API Mapping"
+sidebar_label: "Realm → ObjectBox mapping"
+description: "Quick reference mapping Realm APIs to ObjectBox equivalents across languages."
+slug: /migrate/realm-to-objectbox/api-mapping
+keywords: [ObjectBox, Realm, migration, API mapping, reference]
+image: /img/social/realm-objectbox-api-mapping.jpg
+---
+
+import Head from '@docusaurus/Head';
+
+# Realm → ObjectBox API Mapping
+
+This quick reference helps you translate common Realm APIs and concepts to ObjectBox equivalents. Use it during migrations together with the full Migration Guide.
+
+> **Note**: Names vary across language bindings (Java/Kotlin, Swift, Dart, Python). When in doubt, check the binding's reference.
+
+## Entities / Models
+
+| Concept | Realm | ObjectBox | Reference |
+|---|---|---|---|
+| Define entity/model | `open class Note : RealmObject()` (notable exception: RealmObject is an interface in Kotlin!) | `@Entity class Note { @Id var id: Long = 0 }` | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/latest/library-base/io.realm.kotlin.types/-realm-object/index.html ) \| [ObjectBox reference](https://docs.objectbox.io/entity-annotations ) || Primary key / ID | `@PrimaryKey var id: Long = 0` | `@Id var id: Long = 0` (auto-assigned on insert unless assignable) | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/latest/library-base/io.realm.kotlin.types.annotations/-primary-key/index.html) \| [ObjectBox reference](https://docs.objectbox.io/advanced/object-ids) |
+| Index | `@Index` | `@Index` | [Realm reference](https://www.mongodb.com/docs/realm-sdks/java/10.3.1/io/realm/RealmObjectSchema.html) \| [ObjectBox reference](https://docs.objectbox.io/entity-annotations) |
+| Ignore field | `@Ignore` | `@Transient` / binding-specific | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/latest/library-base/io.realm.kotlin.types.annotations/-ignore/index.html) \| [ObjectBox reference](https://docs.objectbox.io/entity-annotations) |
+
+## Create / Update
+
+| Task | Realm | ObjectBox | Reference |
+|---|---|---|---|
+| Insert | `realm.write { copyToRealm(obj) }` | `box.put(obj)` | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/1.4.0/library-base/-realm%20-kotlin%20-s-d-k/io.realm.kotlin/-mutable-realm/copy-to-realm.html) \| [ObjectBox reference](https://docs.objectbox.io/getting-started) |
+| Insert many | `realm.write { copyToRealm(items) }` | `box.put(items)` (single TX) | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/1.4.0/library-base/-realm%20-kotlin%20-s-d-k/io.realm.kotlin/-mutable-realm/copy-to-realm.html) \| [ObjectBox reference](https://docs.objectbox.io/transactions) |
+| Update (by ID) | `write { findLatest(obj)?.apply{…} }` | `box.put(obj)` (same ID) | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/latest/library-base/io.realm.kotlin/-mutable-realm/find-latest.html) \| [ObjectBox reference](https://docs.objectbox.io/getting-started) |
+
+> **ID behavior**: By default, ObjectBox assigns IDs on insert (`id == 0`). For **assignable IDs**, mark the ID as assignable in your binding (e.g., `@Id(assignable = true)` in Java/Kotlin).
+
+## Read
+
+| Task | Realm | ObjectBox | Reference |
+|---|---|---|---|
+| Get by ID | `realm.query<Note>("id == $0", id).first().find()` | `box.get(id)` | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/latest/library-base/io.realm.kotlin.query/RealmQuery/index.html) \| [ObjectBox reference](https://objectbox.io/docfiles/java/current/io/objectbox/Box.html) |
+| Get multiple by IDs | Filter with `IN` | Java/Kotlin: `box.get(long[] ids)`; Dart: `getMany(ids)` | [Realm reference](https://www.mongodb.com/docs/realm-sdks/js/latest/tutorial-query-language.html) \| [ObjectBox reference](https://javadoc.io/static/io.objectbox/objectbox-java/2.9.1/io/objectbox/Box.html) |
+| Query by field | `realm.query<Note>("title == $0", "x")` | Build a query with conditions (binding API) | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/latest/library-base/io.realm.kotlin.query/RealmQuery/index.html) \| [ObjectBox reference](https://docs.objectbox.io/queries) |
+
+## Delete
+
+| Task | Realm | ObjectBox | Reference |
+|---|---|---|---|
+| Delete by object | `write { delete(obj) }` | `box.remove(obj)` | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/latest/library-base/io.realm.kotlin/-mutable-realm/delete.html) \| [ObjectBox reference](https://docs.objectbox.io/getting-started) |
+| Delete by ID | `write { findLatest(obj)?.let{ delete(it) } }` | `box.remove(id)` (returns boolean) | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/latest/library-base/io.realm.kotlin/-mutable-realm/delete.html) \| [ObjectBox reference](https://objectbox.io/docfiles/java/current/io/objectbox/Box.html) |
+| Delete many | `write { delete(query.find()) }` | `box.remove(ids or collection)` (use a TX) | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/latest/library-base/io.realm.kotlin/-mutable-realm/delete.html) \| [ObjectBox reference](https://objectbox.io/docfiles/java/current/io/objectbox/Box.html) |
+
+## Relations
+
+| Type | Realm | ObjectBox | Reference |
+|---|---|---|---|
+| 1:1 | Field reference | Relation field or ID reference | [Realm reference](https://www.mongodb.com/docs/realm-sdks/java/10.3.1/io/realm/RealmObjectSchema.html) \| [ObjectBox reference](https://docs.objectbox.io/relations) |
+| 1:n | `RealmList<T>` | `ToMany<T>` / relation list | [Realm reference](https://www.mongodb.com/docs/realm-sdks/java/latest/io/realm/RealmList.html) \| [ObjectBox reference](https://docs.objectbox.io/relations) |
+| m:n | Two `RealmList`s or link objects | Relation entity or reciprocal `ToMany` (binding-specific) | [Realm reference](https://www.mongodb.com/docs/realm-sdks/java/latest/io/realm/RealmList.html) \| [ObjectBox reference](https://docs.objectbox.io/relations) |
+
+## Transactions
+
+| Task | Realm | ObjectBox | Reference |
+|---|---|---|---|
+| Run in TX | `realm.write { … }` | `store.runInTx { … }` | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/latest/library-base/io.realm.kotlin/-mutable-realm/write.html) \| [ObjectBox reference](https://docs.objectbox.io/transactions) |
+| Read-only TX | `realm.read { … }` | Implicit for single ops; explicit TX optional | [Realm reference](https://www.mongodb.com/docs/realm-sdks/kotlin/latest/library-base/io.realm.kotlin/-realm/read.html) \| [ObjectBox reference](https://docs.objectbox.io/transactions) |
+
+## Vector / Similarity Search (if applicable)
+
+If your migration targets vector/similarity search, ObjectBox supports **on-device vector indexing** with HNSW in supported bindings. Check the binding documentation for APIs and constraints.
+
+**Reference:** [ObjectBox reference](https://docs.objectbox.io/on-device-vector-search)
+
+---
+
+## See also
+- [Realm → ObjectBox Migration Guide](./realm-to-objectbox-migration.mdx)
+- [Transactions](./transactions.mdx)
+- [box.put()](./box-put-method.mdx)
+- [box.get()](./box-get-method.mdx)
+- [box.remove()](./box-remove-method.mdx)
+
+<Head>
+  <meta property="og:title" content="Realm → ObjectBox API Mapping" />
+  <meta property="og:description" content="Quick reference mapping Realm APIs to ObjectBox equivalents across languages." />
+  <meta property="og:image" content="https://objectbox.io/dev-how-to/img/social/realm-objectbox-api-mapping.jpg" />
+  <meta property="og:type" content="article" />
+  <script type="application/ld+json">{JSON.stringify({"@context": "https://schema.org", "@type": "TechArticle", "mainEntityOfPage": {"@type": "WebPage", "@id": "https://dev.objectbox.io/migrate/realm-to-objectbox/api-mapping"}, "headline": "Realm → ObjectBox API Mapping", "description": "Quick reference mapping Realm APIs to ObjectBox equivalents across languages.", "keywords": "ObjectBox, Realm, migration, API mapping, reference", "datePublished": "2025-07-10T11:56:15+02:00", "dateModified": "2025-09-10T11:56:15+02:00", "author": {"@type": "Organization", "name": "ObjectBox", "url": "https://dev.objectbox.io/"}})}</script>
+</Head>

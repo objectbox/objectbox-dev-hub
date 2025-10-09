@@ -1,0 +1,448 @@
+---
+id: technical-realm-vs-object-box-audit
+title: "Technical Realm Vs Object Box Audit"
+sidebar_label: "Technical Realm Vs Object Box Audit"
+description: "A Technical Audit of RealmDB and ObjectBox, comparing the on-device databases on a technical level"
+slug: /migrate/technical-realm-vs-object-box-audit
+keywords: [ObjectBox, Realm]
+image: /img/social/technical-realm-vs-object-box-audit.jpg
+---
+import Head from '@docusaurus/Head';
+
+<Head>
+  <meta property="og:title" content="Technical Realm Vs Object Box Audit" />
+  <meta property="og:description" content="A Technical Audit of RealmDB and ObjectBox, comparing the on-device databases on a technical level" />
+  <meta property="og:image" content="https://objectbox.io/dev-how-to/img/social/technical-realm-vs-object-box-audit.jpg" />
+  <meta property="og:type" content="article" />
+<script
+type="application/ld+json"
+dangerouslySetInnerHTML={{
+__html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Technical Realm Vs Object Box Audit",
+  "description": "A Technical Audit of RealmDB and ObjectBox; perfect for understanding the similarities, differences, and unique advantages and disadvantages the two databases bring to the table.",
+  "keywords": ["ObjectBox", "Realm"]
+})
+}}
+/>
+</Head>
+
+# A Technical Audit of RealmDB and ObjectBox
+
+## Foundational Architecture & Data Modeling
+
+The architectural foundation of a database determines its performance characteristics as well as the developer experience, schema evolution capabilities, and the degree of coupling it imposes on an application. An audit of RealmDB and ObjectBox reveals two fundamentally different philosophies in data modeling. RealmDB employs an integrated object model rooted in class inheritance, creating a tightly coupled but therefore reactive system. In contrast, ObjectBox utilizes an annotation-driven framework that preserves the integrity of "Plain Old Objects" (POJOs/POCOs), prioritizing architectural separation & performance in exchange for some explicit constraints. [[MongoDB Realm Swift Docs](https://github.com/realm/realm-swift) | [ObjectBox Docs](https://docs.objectbox.io/)]
+
+### 1.1 RealmDB: The Integrated Object Model
+
+RealmDB's approach to data modeling is to directly map language-native classes to the database schema, a concept it promotes as intuitive for developers. The verification of this model confirms that persistable objects are defined by creating classes that inherit from a base Realm.Object class, making them "managed objects" tightly coupled to the Realm instance. This pattern is consistent across its various SDKs. [[MongoDB Realm Swift Docs](https://github.com/realm/realm-swift)]
+
+For instance, the official Swift documentation provides a canonical example where a Dog class is made persistable by inheriting from Object and using the <code>@Persisted</code> property wrapper to mark fields for storage: 
+```swift
+// Define your models like regular Swift classes
+class Dog: Object {
+    @Persisted var name: String
+    @Persisted var age: Int
+}
+```
+<div style={{textAlign: 'right'}}>[[MongoDB Realm Swift Docs](https://github.com/realm/realm-swift)]</div>
+
+
+Similarly, in the JavaScript/TypeScript ecosystem, models extend the <code>Realm.Object</code> base class. The documentation shows a Task class defined this way, demonstrating the uniformity of this inheritance-based paradigm:
+
+```typescript
+class Task extends Realm.Object&lt;Task, "description"&gt; {
+    _id = new Realm.BSON.ObjectId();
+    description!: string;
+    @index
+    isComplete = false;
+    static primaryKey = "_id";
+    constructor(realm, description: string) {
+        super(realm, &#123; description &#125;);
+    }
+}
+```
+<div style={{textAlign: 'right'}}>[[MongoDB Realm Docs](https://www.mongodb.com/docs/realm/) | [MongoDB Realm JavaScript Docs](https://www.mongodb.com/docs/realm-sdks/js/latest/)]</div>
+
+
+Relationships between these objects are established via "links," which are properties that directly reference another <code>Realm.Object</code> instance. This creates a natural, object-oriented graph within the database. [[Wikipedia on MongoDB Realm](https://en.wikipedia.org/wiki/Realm_)]
+
+This design choice carries significant architectural implications. The mandatory inheritance from <code>Realm.Object</code> means that the application's domain models are coupled to the Realm framework and objects are not plain, independant objects. E.g., a Task object is not just a simple data structure; it is intrinsically a "Realm object." This tight coupling is the mechanism that enables one of Realm's marquee features: "Live Objects". These objects are proxies to the underlying database data, meaning any changes made to the data are automatically reflected in all instances of that object without re-fetching.
+
+While this is powerful for building reactive applications, it introduces constraints. These objects can be difficult to create, manipulate, or test outside the context of an active Realm instance. Serializing them for transmission over a network to a non-Realm backend or using them in layers of an application designed with persistence-agnostic principles (e.g., Domain-Driven Design) can become complex, often requiring the creation of separate, detached Data Transfer Objects (DTOs).
+
+In summary, the "intuitive" nature of the model, therefore, represents a trade-off: it simplifies reactivity at the cost of object portability, architectural purity, and oftentimes: performance. [[MongoDB Realm Swift Docs](https://github.com/realm/realm-swift)]
+
+### 1.2 ObjectBox: The Annotation-Driven Entity Framework
+
+ObjectBox adopts a fundamentally different approach, using annotations to decorate standard classes, thereby designating them as persistable entities. This methodology keeps the domain objects as "Plain Old Java Objects" (POJOs) or their equivalents in other languages, ensuring a clean separation between the data model and the persistence framework.
+
+The core of this pattern is the <code>@Entity</code> annotation, which marks a class for persistence. Within such a class, one property must be annotated with <code>@Id</code> to serve as the primary key. A critical and deliberate constraint of ObjectBox is that this ID property must be a 64-bit integer (long in Java/Kotlin, int in Dart). The official "Getting Started" documentation provides a clear Java example:
+
+```java
+@Entity
+public class User {
+    @Id
+    public long id;
+    public String name;
+}
+```
+<div style={{textAlign: 'right'}}>[[ObjectBox Docs](https://docs.objectbox.io/getting-started)]</div>
+
+
+This pattern is consistent across other supported languages ("language bindings"), e.g. as in the Python binding, where the <code>@Entity</code> decorator serves the same purpose. Another key requirement is that entity classes must provide a no-argument constructor, which the database engine uses for object materialization during query execution. [[ObjectBox Docs](https://docs.objectbox.io/getting-started) | [ObjectBox Docfiles](https://objectbox.io/docfiles/python/current/overview.html)]
+
+
+These constraints, particularly the mandatory long ID, are not arbitrary limitations but are foundational to ObjectBox's performance-oriented design. A numeric, auto-incrementing primary key is the most efficient mechanism for the underlying C/C++ core to handle internal data lookups, indexing, and relationship management. This design avoids the performance overhead associated with string comparisons or the management of more complex key types. By enforcing this constraint, ObjectBox prioritizes raw speed and efficiency. [[ObjectBox Docs](https://docs.objectbox.io/getting-started)]
+
+Furthermore, the use of annotations means the <code>User</code> class has no compile-time dependency on any ObjectBox base class. The persistence logic is metadata applied to the class, not a characteristic inherited by it. This promotes loose coupling and allows the same domain objects to be used seamlessly across different layers of an application, serialized, or tested without any dependency on the database framework. This architectural choice places a premium on performance and design purity, accepting a minor reduction in flexibility (regarding primary key types) to achieve these goals.
+
+
+### 1.3 Synthesis: A Comparative Analysis of Modeling Paradigms
+
+The two data modeling paradigms represent a classic architectural trade-off. Realm's inheritance-based model offers a deeply integrated and therefore reactive experience out-of-the-box. The "live objects" feature can reduce the amount of boilerplate code required to keep a user interface synchronized with the underlying data. However, this comes at the cost of tightly coupling the application's domain model to the persistence layer, which reduces testability, architectural flexibility, and in many cases performance. [[MongoDB Realm Swift Docs](https://github.com/realm/realm-swift)]
+
+ObjectBox's annotation-driven model enforces a stricter separation of concerns. Entities remain simple, portable objects (POJOs), which aligns well with layered architectural patterns like Clean Architecture or Domain-Driven Design. The framework's constraints, such as the mandatory long ID, are explicit choices made to optimize for performance. While this approach requires developers to use separate mechanisms for data observation and reactivity (e.g., Data Observers or Rx integrations), it provides greater control and architectural purity. The choice between these two models is therefore not merely a matter of preference but a strategic decision about the architectural priorities of a project: integrated reactivity versus performance and modularity. [[ObjectBox Docs](https://docs.objectbox.io/)]
+
+## 2. Database Lifecycle: Configuration and Initialization
+
+The process of configuring and obtaining a connection to a database is a critical first step where subtle API differences can have significant downstream effects on application behavior, particularly concerning data synchronization and schema management. The initialization patterns of RealmDB and ObjectBox reveal their core design philosophies regarding synchronicity and the handling of database schemas.
+
+
+### 2.1 Instantiating the Database: A Study in Contrasts
+
+RealmDB and ObjectBox present markedly different entry points for database access. The Realm database has two separate ways to start up (across languagee bindings, though we are referencing the JavaScript Docs in the following): one that makes your app wait (synchronous) and one that works in the background (asynchronous). This distinction often confuses developers [[MongoDB Realm Q&A on Stackoverflow](https://stackoverflow.com/questions/48668497/realm-open-vs-new-realm)]
+
+The synchronous constructor, <code>new Realm(config)</code>, is intended for opening a local, non-synchronized Realm file. It returns a Realm instance immediately, creating the file if it doesn't exist. This method is straightforward for purely offline applications. [[MongoDB Realm Q&A on Stackoverflow](https://stackoverflow.com/questions/48668497/realm-open-vs-new-realm)]
+
+In contrast, the static method <code>Realm.open(config)</code> returns a ProgressPromise. This asynchronous approach is essential when using Realm's data synchronization features. The promise resolves with the Realm instance only after the local file has been opened and, crucially, the initial synchronization with the remote backend has been completed. Using <code>new Realm()</code> on a synced Realm configuration would open the local file without waiting for remote data, potentially leading to an inconsistent or empty data state. This dual-API design reflects an architecture where synchronization was a major feature layered on top of the core local database, necessitating a separate, asynchronous entry point to manage the inherent latency of network operations. [[MongoDB Realm Q&A on Stackoverflow](https://stackoverflow.com/questions/48668497/realm-open-vs-new-realm) | [MongoDB Realm Dev Forum](https://www.mongodb.com/community/forums/t/when-to-open-realms-async-vs-sync/14415) | [MongoDB Realm Docs](https://www.mongodb.com/docs/realm-sdks/js/latest/Realm.html)]
+
+ObjectBox, on the other hand, provides a single, unified initialization pattern through a generated builder class. The entry point is always the static <code>MyObjectBox.builder()</code> method, which returns a <code>BoxStoreBuilder</code> instance. This builder is then used to configure and create the central <code>BoxStore</code> object, from which individual <code>Box&lt;T&gt;</code> instances are retrieved.
+
+
+```java
+// Standard initialization for a local ObjectBox database
+BoxStore store = MyObjectBox.builder()
+  .name("my-app-db")
+  .build();
+```
+[[ObjectBox Docs](https://docs.objectbox.io/)]
+
+Data synchronization in ObjectBox is not handled by a separate factory method but is configured as an optional component within the same builder flow. After the <code>BoxStore</code> is built, a <code>SyncClient</code> is attached to it:
+
+```java
+// Initialization with Sync enabled
+BoxStore store = MyObjectBox.builder().name("my-app-db").build();
+if (Sync.isAvailable()) {
+    SyncClient syncClient = Sync.client(store, "ws://127.0.0.1:9999", SyncCredentials.none()).build();
+    syncClient.start();
+}
+```
+[[ObjectBox Docs](https://docs.objectbox.io/getting-started) | [ObjectBox Java](https://github.com/objectbox/objectbox-java)]
+
+This unified builder pattern demonstrates the more modular architecture where the core local database is the foundation, and features like synchronization are add-ons. It presents a single, predictable initialization path for the developer, regardless of whether sync is being used, thereby reducing the potential for confusion between synchronous and asynchronous entry points. [[ObjectBox Website](https://objectbox.io/get-started-with-syncing-data-in-java/)]
+
+### 2.2 Configuration Parameters Audit
+
+The configuration objects passed during initialization highlight further differences, particularly in how database schemas are managed.
+
+
+#### 2.2.1  Configuration Parameters in RealmDB
+
+For Realm, the configuration object's <code>schema</code> property is paramount. It requires an array of all model classes (or schema objects) that will be used in that Realm instance. This schema must be provided every time the database is opened.
+
+```javascript
+// Realm configuration requires an explicit schema array
+const realm = await Realm.open({
+  schema: [/* ... your models ... */],
+  // other config properties...
+});
+```
+[[MongoDB Realm Docs](https://www.mongodb.com/docs/realm-sdks/js/latest/Realm.html) | [MongoDB Realm Dev Forum](https://www.mongodb.com/community/forums/t/opening-realm-with-multiple-schema-classes/126151)]
+
+This makes the schema an explicit, runtime concern. Schema migrations are handled programmatically by incrementing a <code>schemaVersion</code> number in the configuration and providing a corresponding migration function that is executed if the on-disk version is lower than the configured version.
+
+#### 2.2.2  Configuration Parameters in ObjectBox Database
+
+ObjectBox handles schema definition as a build-time artifact. When the project is compiled, the ObjectBox Gradle plugin processes the <code>@Entity</code> annotated classes and generates two key assets: the <code>MyObjectBox</code> class and a schema definition file named <code>objectbox-model.json</code>. This JSON file contains a complete representation of the schema, including unique IDs (UIDs) for every entity and property, which are crucial for managing schema evolution. The <code>BoxStore</code> is thus implicitly aware of the schema through this generated code, and no schema definition needs to be passed at runtime. [[ObjectBox Docs](https://docs.objectbox.io/getting-started) | [ObjectBox Docfiles](https://objectbox.io/docfiles/java/current/io/objectbox/annotation/package-summary.html)]
+
+This build-time approach enables what ObjectBox terms "automatic schema migrations" for non-breaking changes like adding or removing a property. [[ObjectBox Java](https://github.com/objectbox/objectbox-java)]
+Because the <code>objectbox-model.json</code> file tracks entities and properties by their stable UIDs, the engine can handle renames (via the <code>@NameInDb</code> annotation) and other simple changes without requiring manual migration code. The developer's responsibility shifts from writing migration code to ensuring that the <code>objectbox-model.json</code> file is committed to version control, as it serves as the persistent record of the schema's history. [[ObjectBox Docs](https://docs.objectbox.io/getting-started)]
+
+#### 2.2.3  Configuration Parameters RealmDB vs ObjectBox Audit
+
+In summary, the configuration and initialization processes underscore the core architectural differences. Realm's runtime schema configuration provides explicit, programmatic control over migrations, while ObjectBox's build-time schema generation offers a more automated, convention-over-configuration approach to schema evolution, powered by its persistent model file.
+
+
+## 3. Core Data Operations: A Comparative API Audit
+
+The day-to-day utility of a database is defined by the ease-of-use and performance of its core operations: **C**reate, **R**ead, **U**pdate, and **D**elete (**CRUD**). A detailed audit of the RealmDB and ObjectBox APIs reveals significant differences in transaction management, query result types, and overall developer workflow.
+
+### 3.1 Write Operations: Transactions, Inserts, and Updates
+
+A key distinction of the two databases lies in the granularity and explicitness of their transaction management.
+
+#### 3.1.1 Write Operations in MongoDB Realm
+RealmDB enforces a strict, high-level transactional model where every database modification - e.g. an insert, update, or delete - must be explicitly wrapped in a <code>realm.write()</code> transaction block.
+
+
+The API for creating a new object is <code>realm.create(ObjectType, properties)</code>, which must be called within the write block. The following example is idiomatic for Realm:
+
+```javascript
+let task1;
+realm.write(() => {
+  task1 = realm.create("Task", {
+    _id: 1,
+    description: "Learn MongoDB",
+  });
+});
+```
+[[Community Example on MongoDB Realm](https://www.codesofphoenix.com/realm)]
+
+Updates are performed by fetching a managed "live object" and modifying its properties within a write transaction. The Swift documentation provides a clear example:
+
+```swift
+let dog = realm.objects(Dog.self).first!
+// Update the dog's name in a transaction
+try! realm.write {
+    dog.name = "Wolfie"
+}
+```
+[[Community Example on MongoDB Realm](https://www.codesofphoenix.com/realm) | [MongoDB Realm Swift Docs](https://github.com/realm/realm-swift)]
+
+This model is rigid but inherently safe; it is impossible for a developer to accidentally perform a write operation outside of a transaction, thus ensuring data consistency.
+
+#### 3.1.2 Write Operations in ObjectBox Database
+ObjectBox, in contrast, employs a more flexible, fine-grained transaction model. The primary method for both inserts and updates is <code>box.put(entity)</code>. This method's behavior is determined by the entity's ID property. If the ID is 0 (the default for a new object), <code>put</code> performs an insert, assigns a new unique ID to the object, and returns it. If the ID is non-zero and matches an existing object in the database, <code>put</code> performs an update. [[ObjectBox Docs](https://docs.objectbox.io/getting-started) | [ObjectBox Docfiles](https://objectbox.io/docfiles/java/current/io/objectbox/Box.html)]
+
+Each individual <code>box.put(entity)</code> call is atomic and runs in its own implicit transaction. This is highly convenient for simple, single-object writes.
+
+```java
+// Insert a new user (assuming user.id is 0)
+User user = new User("Tina");
+userBox.put(user);
+// This is a complete, atomic transaction
+
+// Update an existing user
+user.setName("Tina Turner");
+userBox.put(user);
+// This is also a complete transaction
+```
+[[ObjectBox Docs](https://docs.objectbox.io/getting-started)]
+
+While convenient, performing many <code>put</code> operations in a loop can be inefficient, as each call creates and commits a separate transaction. For this reason, the ObjectBox documentation strongly recommends using bulk operations like <code>box.put(Collection&lt;T&gt; entities)</code> or wrapping multiple operations in an explicit transaction using <code>store.runInTx(() -&gt; &#123;... &#125;)</code> for optimal performance. This design places more responsibility on the developer to recognize performance-critical paths and optimize them, offering flexibility at the cost of requiring more developer awareness compared to Realm's enforced transaction model.
+
+#### 3.1.3 Write Operations ObjectBox vs Realm Audit
+
+In summary: ObjectBox expects developers to think along themselves, but with this also giving them the opportunity to develop faster and more seamless app experiences. If you are a developer you can either view that as an additional benefit, helping you learn and grow, or you can bet on the AIs of the future to take over the thinking for you. Either way, ObjectBox offers you more flexibility and speed here. [[ObjectBox Docs](https://docs.objectbox.io/getting-started) | [ObjectBox Docfiles](https://objectbox.io/docfiles/java/current/io/objectbox/Box.html)]
+
+
+### 3.2 Read Operations: Object Retrieval and Querying
+
+The most profound difference in read operations is not the query syntax, but the nature of the results returned. Realm's query engine returns "live," auto-updating collections, whereas ObjectBox returns static, point-in-time snapshots of the data. Both approaches have their advantages and disadvantages.
+
+#### 3.2.1 Read Operationsin RealmDB
+
+In Realm, retrieving all objects of a certain type is done via <code>realm.objects('ObjectType')</code>. This can be chained with a <code>.filter()</code> method using a query language string to specify conditions.
+
+```swift
+// Get all dogs named 'Fido'
+let dogs = realm.objects(Dog.self).filter("name contains 'Fido'")
+```
+[[MongoDB Realm Swift Docs](https://github.com/realm/realm-swift)]
+
+The <code>dogs</code> variable in this example is not a simple array. It is a <code>Results&lt;Dog&gt;</code> collection that is "live." If another thread or process adds a new dog named 'Fido' to the database, the <code>dogs</code> collection will automatically be updated. This is the cornerstone of Realm's reactive architecture and enables seamless integration with UI frameworks like SwiftUI, where views bound to these collections re-render automatically. However, bear in mind that Live Realm objects, collections, and Realm instances are *thread-confined*. This means an object fetched on the main thread cannot be accessed or modified on a background thread, and vice-versa. Attempting to do so will cause your application to crash. [[MongoDB Realm Swift Docs](https://github.com/realm/realm-swift)]
+
+
+
+
+#### 3.2.2 Read Operations in ObjectBox Database
+
+ObjectBox provides <code>box.get(id)</code> for efficient primary key lookups and <code>box.getAll()</code> to retrieve all objects in a box. For more complex queries, it provides a fluent builder API that is strongly typed and checked at compile time:
+
+```java
+// Get all users named "Tom", ordered by name
+Query<User> query = userBox
+  .query(User_.name.equal("Tom"))
+  .order(User_.name)
+  .build();
+List<User> results = query.find();
+query.close();
+```
+[[ObjectBox Docs](https://docs.objectbox.io/getting-started) | [ObjectBox Getting Started Video](https://www.youtube.com/watch?v=flmAeYY-u9I)]
+
+The <code>results</code> variable here is a standard <code>java.util.List&lt;User&gt;</code>. It is a snapshot of the data at the exact moment <code>query.find()</code> was executed. It will not change if the underlying data in the database is modified. To see new or updated data, the query must be explicitly re-executed.
+
+ObjectBox provides a separate, explicit mechanism for reactivity through its Data Observers and RxJava integrations. A developer can subscribe to changes on a Box or a Query and will be notified when the data changes, at which point they can choose to re-run the query and update the UI. [[ObjectBox Docs](https://docs.objectbox.io/)]
+
+#### 3.2.3 Read Operations in RealmDB vs ObjectBox Audit
+
+In summary, Realm's model is implicitly reactive, which can feel "magical" and reduce boilerplate but may also lead to unexpected side effects or performance issues if the developer is not fully aware of the constant background updates. ObjectBox's model is explicitly non-reactive by default, giving the developer complete control and predictability over when data refreshes occur.
+
+
+
+
+
+### 3.3 Delete Operations
+
+Deletion APIs in both databases are straightforward and follow their respective transaction models.
+
+#### 3.3.1 Delete in RealmDB
+
+In Realm, deletion is handled by the <code>realm.delete(object)</code> method, which, like all write operations, must be called inside a <code>realm.write()</code> transaction block. It can be used to delete a single object or a collection of objects. [[MongoDB Realm Kotlin Docs](https://www.mongodb.com/docs/realm-sdks/kotlin/latest/library-base/io.realm.kotlin/-mutable-realm/delete.html) | [MongoDB dev Forum Swift](https://www.mongodb.com/community/forums/t/deleting-a-realm-object-on-the-detail-view-in-swiftui/197104/2)]
+
+```javascript
+realm.write(() => {
+  let taskToDelete = realm.objectForPrimaryKey("Task", 1);
+  realm.delete(taskToDelete);
+});
+```
+[[Realm JavaScript Docs](https://www.mongodb.com/docs/realm-sdks/js/latest/)]
+
+#### 3.3.1 Delete in ObjectBox Database
+
+
+ObjectBox provides several methods for deletion on the <code>Box</code> class: <code>box.remove(entity)</code> or <code>box.remove(id)</code> for single objects, <code>box.remove(entities)</code> or <code>box.removeByIds(ids)</code> for bulk removal of specific objects, and <code>box.removeAll()</code> to clear all objects from the box. ObjectBox ensures automatically that each and every one of these operations is atomic and transactional. This means the operation either completes fully or not at all, ensuring data consistency. [[ObjectBox Docs](https://docs.objectbox.io/getting-started) | [ObjectBox Transaction Docs](https://docs.objectbox.io/transactions)]
+```python
+# Delete a single object by passing the entity instance, e.g. Removing 'Alice' by passing the user object
+box.remove(user1)
+
+# Delete a single object by passing its ID, e.g. Removing 'Bob' by using his ID
+# After an object is put, its 'id' attribute is populated.
+box.remove(user2.id)
+
+# Delete all remaining objects in the box
+box.removeAll()
+```
+[[ObjectBox Tutorial Demo Project](https://docs.objectbox.io/tutorial-demo-project)]
+
+
+
+## 4. Advanced Capabilities and Strategic Differentiators
+
+Beyond fundamental CRUD operations, the strategic value of a database is often determined by its advanced features, such as data synchronization, relationship management, and unique capabilities that cater to emerging application paradigms. An audit of these areas reveals a significant difference in the product strategies and future viability of RealmDB and ObjectBox.
+
+### 4.1 Data Synchronization: A Critical Evaluation
+
+Data synchronization is a cornerstone of modern, offline-first applications, and has the power to combine the best of the growing Edge Computing (and therefore [Edge AI](https://objectbox.io/empowering-edge-ai-the-critical-role-of-databases/)) model with the predominant cloud-computing paradigm. Historically, Realm's Mobile Platform and later Atlas Device Sync were central to its value proposition, offering real-time, two-way data synchronization between devices and a cloud backend. However, [this capability is now deprecated](https://www.mongodb.com/docs/atlas/app-services/sync/device-sync-deprecation/) and official support (maintenance) for RealmDB has stopped [Discussion on this on reddit](https://www.reddit.com/r/android_devs/comments/1fct3k5/aged_like_milk_mongo_just_deprecated_their_realm/). So, while RealmDB is still available as an open source database, without maintenance, rapid decline is unavoidable. The official MongoDB documentation repository for Realm contains an unambiguous warning: "As of September 2024, Atlas Device SDKs are deprecated. Atlas Device SDKs will reach end-of-life and will no longer be maintained by MongoDB on September 30, 2025". [This deprecation notice fundamentally alters any comparison of the two databases](https://objectbox.io/alternative-to-mongodb-sync/). Realm's synchronization feature, while historically powerful, is no longer available, neither for new projects nor for existing applications. Any technical evaluation must treat Realm Sync as a legacy feature with a defined end-of-life. One of the solutions for migration, officially embraced by MongoDB, is ObjectBox.
+
+
+Reference: [MongoDB Realm Docs](https://www.mongodb.com/docs/realm/)
+
+
+
+
+In stark contrast, ObjectBox actively develops and promotes its Data Sync feature as a key strategic offering. The ObjectBox Sync architecture is designed for efficiency and resilience in offline-first scenarios. It operates on a delta-synchronization model, where only changes (diffs) are pushed between the client and server, significantly reducing network traffic compared to state-based or request-response paradigms. When a device is offline, changes are stored in a persistent outgoing queue. Upon reconnection, the queue is processed, and data is synchronized with the server. Just like in RealmDB, the Data Sync feature is ObjectBox's premium (and therfore paid) offering. In summer 2025 ObjectBox released its production-ready "MongoDB Connector" that enables syncing directly fom ObjectBox to MongoDB and which they set up as a "seamless, drop-in replacement for MongoDB Realm Atlas Device Sync".
+
+
+Reference: [ObjectBox Docs](https://docs.objectbox.io/)
+
+
+Configuration of ObjectBox Sync involves annotating entities with <code>@Sync</code> and connecting a <code>SyncClient</code> to the <code>BoxStore</code> instance, pointing it to a self-hosted or managed Sync Server. The documentation provides clear steps for setting up this client-server topology.
+
+
+Reference: [ObjectBox Docs](https://docs.objectbox.io/)
+
+
+
+
+
+The comparison of synchronization capabilities has therefore shifted dramatically. It is no longer a feature-to-feature analysis between two active technologies. Instead, it is a comparison between ObjectBox's actively supported, delta-based synchronization solution and Realm's deprecated, no longer supported Atlas Device Sync. For any project requiring data synchronization, this strategic divergence is the single most critical factor in the decision-making process.
+
+Reference: [MongoDB Realm Docs](https://www.mongodb.com/docs/realm/) | Reference: [ObjectBox Docs](https://docs.objectbox.io/)
+
+
+### 4.2 Data Relationships: Implementation and Management
+
+Both databases provide robust support for modeling relationships between objects, though their APIs differ in implementation.
+
+
+
+
+Realm uses a natural, direct-linking approach. A to-one relationship is simply a property that holds a reference to another <code>Realm.Object</code> subclass. A to-many relationship is represented by a property of type <code>List&lt;T&gt;</code>, where T is another <code>Realm.Object</code> subclass.1 This creates an intuitive object graph that developers can traverse directly in code.
+
+[[MongoDB Realm Swift Docs](https://github.com/realm/realm-swift) | [RealmDB Wikipedia](https://en.wikipedia.org/wiki/Realm_(database))]
+
+
+ObjectBox employs a more explicit and managed approach to relationships. A to-one relationship is declared using the <code>ToOne&lt;T&gt;</code> wrapper class. This class acts as a smart proxy that lazily loads the target object from the database upon first access, which is a performance optimization that avoids loading the entire object graph into memory at once.20
+
+
+```java
+@Entity
+public class Order {
+    @Id public long id;
+    public ToOne<Customer> customer;
+}
+```
+[[ObjectBox Docs](https://docs.objectbox.io/relations)]
+
+To-many relationships in ObjectBox can be implemented in two ways. The most common is a one-to-many relationship, which is defined using the <code>@Backlink</code> annotation. This creates a read-only list of objects that point back to the current object via a <code>ToOne</code> relationship defined in the target entity.20 For many-to-many relationships, ObjectBox uses the <code>ToMany&lt;T&gt;</code> class, which allows for adding, removing, and managing a list of related target objects. [[ObjectBox Docs](https://docs.objectbox.io/relations)]
+
+Both approaches are effective, with Realm's offering a more direct navigation experience and ObjectBox's providing more explicit control and built-in lazy loading for performance optimization.
+
+
+
+
+
+
+
+
+### 4.3 Unique Feature Verification
+
+The unique, differentiating features of each database point to their diverging strategic priorities.
+
+
+
+Realm's standout feature has always been its "Live Objects" and the resulting deep integration with reactive UI frameworks. As demonstrated in its Swift documentation with <code>@ObservedResults</code> for SwiftUI, Realm is architected to make building real-time, data-bound user interfaces very simple. This focus on seamless UI reactivity was a natural fit for its (now deprecated) sync service, positioning it as an ideal solution for collaborative applications. [[MongoDB Realm Java Docs on RealmResults](https://www.mongodb.com/docs/realm-sdks/java/latest/io/realm/RealmResults.html) | [MongoDB Realm Swift Docs on Observed Results](https://www.mongodb.com/docs/realm-sdks/swift/latest/Structs/ObservedResults.html) | [MongoDB Dev Forum](https://www.mongodb.com/community/forums/t/update-to-end-of-life-and-deprecation-notice/297168/10)]
+
+
+ObjectBox, on the other hand, is investing heavily in capabilities for the next generation of on-device artificial intelligence. Its recent releases have introduced first-class support for vector search, effectively turning it into an on-device vector database. According to the ObjectBox team and the initial release date, ObjectBox was the [first on-device vector database](https://objectbox.io/the-first-on-device-vector-database-objectbox-4-0/) in the edge computing space, demonstrating their eagerness to support Edge AI. The ObjectBox' vector extension allows for efficient similarity searches on vector embeddings, which is a foundational requirement for AI/ML applications such as Retrieval-Augmented Generation (RAG), semantic search, and recommendation engines. The addition of HNSW (Hierarchical Navigable Small World) indexing and various vector distance metrics (<code>VectorDistanceType</code>) in its API confirms a serious commitment to this domain. [[ObjectBox Java GitHub repo](https://github.com/objectbox/objectbox-java) | [ObjectBox Docfiles](https://objectbox.io/docfiles/java/current/io/objectbox/annotation/package-summary.html) | [ObjectBox C++ Docs](https://cpp.objectbox.io/)]
+
+
+
+Overall, with the deprecation of its sync service and the discontinuation of the support of the open source RealmDB repos, Realm's future under MongoDB appears to have come to an end. ObjectBox is positioning itself as a high-performance data backend for a broader range of use cases, including synchronized, offline-first applications and, increasingly, computationally intensive, AI-driven edge applications. Any technical evaluation must account for these diverging roadmaps, as the best choice of database depends heavily on the long-term strategic goals of the application being built.
+
+
+
+## 5. Synthesis of Findings and Strategic Implications
+
+The comprehensive audit of RealmDB and ObjectBox, based (almost exculsively, but not quite) on their official documentations (official Docs, Docfiles, Dev Forums, GitHub repos), reveals two capable but fundamentally different database solutions. The choice between them extends beyond a simple comparison of API syntax or performance benchmarks; it is a strategic decision influenced by architectural philosophy, developer ergonomics, and, most critically, the long-term product roadmap and viability of core features. This section consolidates the findings and provides a conclusive analysis.
+
+### 5.1 Strategic Decision Framework
+
+Based on the comprehensive audit, the following decision framework emerges for choosing between RealmDB and ObjectBox:
+
+#### Choose RealmDB if:
+- You can live with a database that does not have an official maintainer (and may or may not be maintained)
+- Your application is purely local (no synchronization requirements)
+- You prioritize seamless UI reactivity and live data binding over performance
+- You are building for iOS/macOS and want tight SwiftUI integration
+- You prefer an inheritance-based, tightly integrated object model
+- Schema migrations can be handled programmatically at runtime
+
+#### Choose ObjectBox if:
+- Your application requires data synchronization (critical given Realm Sync deprecation)
+- You prioritize performance and a clean architectural separation (more important for larger apps)
+- You are building AI/ML applications requiring vector search capabilities
+- You prefer annotation-based, POJO-preserving entity models
+- You want build-time schema generation and automatic migrations
+- You need a future-proof solution with active development and roadmap
+
+### 5.2 Critical Considerations
+
+The most significant finding of this audit is the deprecation of Realm's synchronization capabilities. This fundamentally alters the competitive landscape and makes ObjectBox the clear choice for any application requiring data synchronization. The September 30, 2025 end-of-life date for Atlas Device SDKs represents an existential threat to Realm-based applications that rely on sync functionality.
+
+For local-only applications, both databases remain viable, with the choice depending primarily on architectural preferences: Realm's reactive, tightly integrated model versus ObjectBox's performance-oriented, loosely coupled approach.
+
+The emergence of ObjectBox's vector search capabilities positions it uniquely for the next generation of AI-powered applications, while the future of the Realm database (without Sync) remains unclear at this moment.
+
+### 5.4 Conclusion
+
+This technical audit, grounded in official documentation verification, reveals that while both RealmDB and ObjectBox are capable local databases, their strategic trajectories have diverged significantly. ObjectBox's continued investment in synchronization, performance optimization, and AI capabilities, combined with Realm's sync deprecation, makes ObjectBox the more future-proof choice for most modern application requirements. The decision ultimately depends on specific project needs, but the synchronization factor alone makes ObjectBox the recommended choice for any application with current or potential future sync requirements.
+
+<Head>
+  <script type="application/ld+json">
+    {JSON.stringify({"@context": "https://schema.org", "@type": "TechArticle", "mainEntityOfPage": {"@type": "WebPage", "@id": "https://dev.objectbox.io/migrate/technical-realm-vs-object-box-audit"}, "headline": "Technical Realm Vs Object Box Audit", "description": "A Technical Audit of RealmDB and ObjectBox; perfect for understanding the similarities, differences, and unique advantages and disadvantages the two databases bring to the table.", "keywords": "Realm, Realm DB replacement, MongoDB Realm alternative, MongoDB Realm Device Sync, migration", "datePublished": "2025-08-20T10:00:00+01:00", "dateModified": "2025-09-09T16:45:00+02:00", "author": {"@type": "Organization", "name": "ObjectBox", "url": "https://dev.objectbox.io/"}}, null, 2)}
+  </script>
+</Head>

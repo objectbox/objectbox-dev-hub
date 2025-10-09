@@ -1,0 +1,109 @@
+---
+id: data-modeling-offline-first-apps
+title: "Data Modeling for Offline-First Apps"
+sidebar_label: "Data modeling"
+description: "Patterns and tips for modeling data in ObjectBox for offline-first mobile and edge apps."
+slug: /guides/data-modeling-offline-first
+keywords: [ObjectBox, data modeling, offline-first, relations, indexes, converters]
+image: /img/social/data-modeling-for-offline-first-apps.jpg
+---
+
+import Head from '@docusaurus/Head';
+
+# Data Modeling for Offline-First Apps
+
+Designing a robust data model is the foundation of any offline-first app. This guide shows pragmatic patterns that work well with ObjectBox across mobile and edge environments: entity boundaries, relations, denormalization, converters, and schema stability.
+
+## Entities & fields
+
+Model each real-world concept as an **Entity** with a stable schema. Favor **explicit, typed fields** over generic JSON blobs to keep indexes fast and queries predictable.
+
+- Keep entity responsibilities cohesive (one concept per entity).
+- Use `@Index` on frequently filtered/sorted fields.
+- Prefer primitive types where possible.
+
+## Relations
+
+ObjectBox supports **one-to-one**, **one-to-many**, and **many-to-many** relations.
+
+- **1:1**: Reference the related object’s ID or use a relation field (binding-specific).
+- **1:n**: Use `ToMany` or a relation list.
+- **m:n**: Depending on the language binding, model with relation entities or reciprocal `ToMany`. Document which binding you target and keep the relation consistent across entities.
+
+<h3 id="relation-tips">Relation tips</h3>
+
+- Load-by-ID when you already know the IDs (cheaper than full queries).
+- For write-heavy use cases, consider **denormalized read fields** to avoid joins.
+
+## Denormalization (read-optimized views)
+
+In offline-first apps, **derived, read-only fields/lists** are practical:
+- Keep authoritative data normalized (single write source of truth).
+- Maintain **derived views** (e.g., “inbox preview”) as precomputed fields updated on writes.
+- Document the update rules where the denormalized field is defined.
+
+This avoids expensive joins/queries on the hot path and simplifies rendering on constrained devices.
+
+## Indexes & query planning
+
+- Index fields used in `WHERE`, sorting, or pagination.
+- Avoid “indexing everything”—each index adds write overhead.
+- When drilling down via multiple filters, test the most selective index first (or rely on the binding’s query planner if available).
+
+## Converters
+
+Use **Converters** to map complex/unsupported types (e.g., `LocalDateTime`, enums with custom codes) to persistable primitives.
+
+- Keep converters **pure** and **invertible**.
+- Prefer encodings that remain stable across versions (e.g., epoch seconds, ISO-8601 strings, or small integers for enums).
+
+## IDs & schema stability
+
+- **IDs**: By default, ObjectBox assigns IDs on insert; if you need to set IDs yourself, use assignable IDs (see language-specific docs).
+- **@Uid**: Use stable `@Uid` values on entities/fields to avoid migration conflicts across branches.
+- Avoid renaming fields lightly; if you must, keep a migration note.
+
+## Transactions & bulk operations
+
+Use a transaction for **logical groups of writes** (e.g., importing 10k items, batch sync). Keep transactions **short** to reduce lock contention on mobile.
+
+- Batch `put`/`remove` within a single transaction where it makes sense.
+- Handle errors inside the transaction and fail fast.
+
+## Offline sync boundaries
+
+For devices that sync, design entities with **clear sync ownership**:
+- Mark fields that are **device-local only** (not synced).
+- Keep **conflict-prone data** isolated or denormalized to ease conflict resolution.
+- Consider a **change-log** entity for auditability and retries.
+
+## Testing & evolution
+
+- Seed test data reflecting production cardinalities and edge cases (nullables, long strings, large collections).
+- Snapshot and restore stores for reproducible benchmarks.
+- Document schema changes alongside code changes.
+
+---
+
+## See also
+- [Transactions](./transactions.mdx)
+- [box.put()](./box-put-method.mdx)
+- [box.remove()](./box-remove-method.mdx)
+- [Realm → ObjectBox Migration Guide](./realm-to-objectbox-migration.mdx)
+
+<Head>
+  <meta property="og:title" content="Data Modeling for Offline-First Apps" />
+  <meta property="og:description" content="Patterns and tips for modeling data in ObjectBox for offline-first mobile and edge apps." />
+  <meta property="og:image" content="https://objectbox.io/dev-how-to/img/social/data-modeling-for-offline-first-apps.jpg" />
+  <meta property="og:type" content="article" />
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context":"https://schema.org",
+      "@type":"TechArticle",
+      "headline":"Data Modeling for Offline-First Apps",
+      "description":"Patterns and tips for modeling data for offline-first mobile and edge apps.",
+      "about":["ObjectBox","data modeling","offline-first","relations","indexes","converters"],
+      "license":"https://creativecommons.org/licenses/by/4.0/"
+    })}
+  </script>
+</Head>

@@ -65,7 +65,7 @@ For organizations to capitalize on the next wave of AI, particularly the transfo
 
 ### Real-time Performance and Reliability: From Low Latency to Autonomous Action
 
-The assertion that on-device processing is "significantly faster" and empowers "real-time decision making" remains a primary driver for edge adoption.
+On-device processing is significantly faster and enables real-time decision making, making it a primary driver for edge adoption.
 [[ObjectBox]](https://objectbox.io/on-device-vector-databases-and-edge-ai/) In numerous critical applications, the latency introduced by a round-trip to the cloud is not merely an inconvenience but a functional impossibility.
 The demand for millisecond-level response times is a core requirement in industrial automation, autonomous navigation, and real-time medical diagnostics.
 [[Promwad]](https://promwad.com/news/edge-ai-model-deployment) A 2025 McKinsey analysis of the automotive sector provides a concrete example, quantifying that edge-based voice assistants can achieve response latencies of 300-700 milliseconds, a stark improvement over the 1000-2200 milliseconds typical of pure cloud solutions.
@@ -94,7 +94,7 @@ The edge becomes the only viable environment for these agentic systems to percei
 This evolution elevates the role of edge computing from a performance optimization to a mission-critical enabler for the next generation of intelligent, autonomous AI.
 ### Data Sovereignty and Privacy: A Growing Mandate
 
-The argument that Edge AI enhances "data ownership and privacy" by processing and storing data on the user's device has become more critical in 2025 than ever before.
+Edge AI enhances data ownership and privacy by processing and storing data on the user's device, and this has become more critical in 2025 than ever before.
 [[ObjectBox]](https://objectbox.io/on-device-vector-databases-and-edge-ai/) This shift is propelled by a dual mandate of declining public trust and increasingly stringent data protection regulations.
 A 2024 McKinsey survey revealed that public confidence in AI providers has fallen to just 53%, making on-device processing a powerful feature for building user trust.
 [[McKinsey via DHInsights]](https://dhinsights.org/news/mckinseys-2025-tech-trends-report-finds-healthcare-caught-between-ai-promise-and-perils) When data, particularly sensitive personal information, remains on a user's device, it fundamentally alters the power dynamic, giving them greater control and reducing exposure to breaches on centralized servers.
@@ -121,7 +121,7 @@ This creates a powerful and enduring tailwind for the entire on-device technolog
 
 ### Economic and Sustainability Drivers: The Hidden Costs of Cloud AI
 
-The assertion that edge computing can significantly reduce bandwidth costs and data traffic—by as much as "60-90%"—while lowering an application's CO2 footprint is strongly supported by current economic and infrastructural pressures.
+Edge computing can significantly reduce bandwidth costs and data traffic—by as much as 60–90 percent—while lowering an application's CO2 footprint, a benefit strongly supported by current economic and infrastructural pressures.
 [[ObjectBox]](https://objectbox.io/on-device-vector-databases-and-edge-ai/) The relentless growth of data is straining network capacity, with IDC data from 2024 showing that 30% of enterprises are experiencing bandwidth demand increases of over 50% per year.
 [[IDC]](https://business.comcast.com/community/docs/default-source/default-document-library/idc-futurescape_-worldwide-future-of-connectedness-2024-predictions.pdf?sfvrsn=d04a6a2c_1) This creates immense and escalating cost pressure on cloud-centric architectures that rely on constant data transmission.
 Simultaneously, the surging demand for compute-intensive AI workloads is placing "new demands on global infrastructure," leading to systemic challenges like data center power constraints and rising energy costs.
@@ -151,10 +151,11 @@ As the energy and hardware demands of the cloud continue to grow, the economic c
 ## Market Trajectory and Adoption Forecasts (2025-2030)
 
 The market for edge computing and Edge AI is characterized by a strong consensus among leading analyst firms on a trajectory of rapid, sustained growth.
-The statistics cited in the original 2024 article are now updated with more recent and granular forecasts that paint a comprehensive picture of the market's velocity, key segments, and adoption patterns.
 ###  Gartner's 2025 Prediction: A Nuanced Reality
 
-Gartner projected that by 2025, more than 55% of all data analysis by deep neural networks would occur at the point of capture in an edge system [ObjectBox]. While that benchmark highlighted the inevitability of edge-based processing, recent industry data shows that adoption is progressing on a more gradual trajectory.  
+While Gartner famously forecast that [75% of enterprise data would be processed at the edge by 2025](https://www.gartner.com/smarterwithgartner/what-edge-computing-means-for-infrastructure-and-operations-leaders), towards the end of 2025 the reality is closer to 35% ([estimated based on Forrester 2025](https://www.forrester.com/report/more-than-half-of-enterprise-data-is-in-the-cloud/RES185482)). Despite the slower initial adoption, as so often happens with these predictions, the edge has now become a strategic priority, with its growth being rapidly accelerated by AI's requirements for real-time processing, low-latency, data privacy, and scalability.
+
+This is the domain of Edge AI - deploying AI models locally, directly on devices. It reduces latency, ensures offline availability, and enhances user privacy by keeping data on-device. And it’s growing fast: [Gartner predicts that by 2029, at least 60% of enterprise-deployed generative AI models will be running on edge devices](https://www.gartner.com/en/documents/5270463) rather than in centralized cloud services. We'll see if this holds true.
 
 A Gartner survey published in April 2025 reports that 27% of manufacturing enterprises have already deployed edge computing. Moreover, 64% of enterprises in the sector expect to have deployments in place by the end of 2027 [Gartner via AT&T]. This shift underscores the sector’s strong momentum toward edge adoption, with analysis capabilities steadily moving closer to where data is generated.  
 
@@ -171,8 +172,7 @@ This architectural pattern is the foundation of Retrieval-Augmented Generation (
 [[Accenture]](https://www.accenture.com/us-en/insights/technology/technology-trends-2024) The RAG process relies on a vector database to perform an ultra-fast similarity search to find the most relevant snippets of context from a knowledge base before that context is passed to the LLM to generate a response.
 [[ObjectBox]](https://objectbox.io/the-first-on-device-vector-database-objectbox-4-0/), [[ObjectBox]](https://objectbox.io/the-on-device-vector-database-for-android-and-java/) This is precisely the mechanism that enables an LLM to "chat with your documents" or access up-to-the-minute information, all while running locally and privately on a device.
 :::tip Agentic AI Memory Architecture
-The role of the vector database, however, extends far beyond simple RAG applications.
-The original article's assertion that vector databases provide "long-term memory to AI" takes on a much more profound meaning in the context of the shift toward Agentic AI.
+The role of the vector database, however, extends far beyond simple RAG applications. "Long-term memory for AI" has a profound meaning in the context of the shift toward Agentic AI.
 [[ObjectBox]](https://objectbox.io/on-device-vector-databases-and-edge-ai/) For a simple chatbot, "memory" might mean persisting conversation history.
 But for an autonomous AI agent, "memory" is the foundation of its ability to learn and make intelligent decisions.
 [[McKinsey]](https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/the-top-trends-in-tech) An autonomous agent operating in the physical world needs to remember its past actions, the outcomes of those actions, the various states of its environment it has observed, and the procedures it has learned in order to make informed decisions about its future actions.
@@ -315,11 +315,6 @@ Within this new edge-centric paradigm, the on-device vector database has emerged
 it is the foundational element that enables localized intelligence. It provides the essential long-term memory for the next generation of agentic systems, the rich semantic context for generative models, and the secure, private repository for personal data.
 As on-device AI models become more sophisticated and autonomous, the role of this underlying data layer will only grow in importance.
 It is the architectural lynchpin that allows an edge device to transform from a simple data collector into an intelligent, learning, and acting entity.
-:::tip Validation of Original Analysis
-The April 2024 ObjectBox article provided a remarkably accurate and prescient overview of the Edge AI landscape.
-[[ObjectBox]](https://objectbox.io/on-device-vector-databases-and-edge-ai/) The analysis conducted in this report validates that its core arguments have not only held true but have been significantly strengthened by the dominant trends of 2025. The primary update required to its future outlook is the recognition of the profound shift from simple generative AI to more complex and autonomous Agentic AI.
-This trend does not invalidate the article's thesis; rather, it massively amplifies its central conclusion about the critical and growing importance of a robust, optimized on-device stack, with the on-device vector database at its heart.
-:::
 
 Based on this analysis, the strategic recommendations for key stakeholders are clear.
 For technology vendors and platform providers, the focus must be on delivering a complete, optimized, and developer-friendly on-device stack that abstracts away the immense complexity of the underlying data, model, and system optimizations.

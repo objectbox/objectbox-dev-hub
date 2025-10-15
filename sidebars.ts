@@ -35,6 +35,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'edge-computing-edge-ai-local-ai-marketanalysis',
         'on-device-vector-database-sync',
+        'on-device-ai-goes-mainstream',
       ],
     },
   ],

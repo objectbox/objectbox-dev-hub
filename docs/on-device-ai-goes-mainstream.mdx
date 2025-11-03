@@ -112,9 +112,10 @@ Yes, they are an option, but be mindful of potential risks and caveats. Be aware
 
 :::info 
 On-device (or Edge) vector databases have a small footprint (a couple of MB, not hundreds of MB)  and are optimized for efficiency on resource-restricted devices.
+
+Edge Vector databases, or on-device vector databases, are still rare. Some server- and cloud-oriented vector databases have recently begun positioning themselves for edge use. However, their relatively large footprint (several hundred MB) makes them unsuitable for truly resource-constrained embedded devices, while they can of course work on laptops and local PCs. More importantly, solutions derived from scaling down from larger systems are generally not optimized for restricted environments, resulting in higher computational demands and increased battery consumption, which in the end also leads to increased costs.
 :::
 
-(Note: Edge Vector databases, or on-device vector databases, are still rare. ObjectBox was the first on-device vector database available on the market. Some server- and cloud-oriented vector databases have recently begun positioning themselves for edge use. However, their relatively large footprint often makes them more suitable for laptops than for truly resource-constrained embedded devices. More importantly, solutions designed by scaling down from larger systems are generally not optimized for restricted environments, resulting in higher computational demands and increased battery consumption.)
 
 <img src="/dev-how-to/img/edge-ai/vector-database.png" alt="Vector Databases" />
 

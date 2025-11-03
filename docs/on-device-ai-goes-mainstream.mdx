@@ -33,7 +33,7 @@ Two megatrends are converging:
 
 - **[Edge Computing](https://objectbox.io/dev-how-to/edge-computing-state-2025)** - Processing data where it is created, on the device, locally, at the edge of the network, is called "Edge Computing" and it is growing
 - **AI** - AI capabilities and use are expanding rapidly and without a need for further explanation
-<img src="/dev-how-to/img/edge-ai/edge-ai.png" alt="Edge AI: Where Edge Computing and AI intersect" />
+<img src="/img/edge-ai/edge-ai.png" alt="Edge AI: Where Edge Computing and AI intersect" />
 
 --> where these two trends overlap (at the intersection), it is called Edge AI (or local AI, on-device AI, or with regards to a subsection: "Mobile AI")
 
@@ -45,7 +45,7 @@ The shift to Edge AI is driven by use cases that:
 * are not economically viable when using the cloud / a cloud AI
 * want to be sustainable 
 
-<img src="/dev-how-to/img/edge-ai/edge-ai-benefits.png" alt="Edge AI drivers (benefits)" />
+<img src="/img/edge-ai/edge-ai-benefits.png" alt="Edge AI drivers (benefits)" />
 
 If you're interested in the sustainability aspect, see also: [Why Edge Computing matters for a sustainable future](https://objectbox.io/why-do-we-need-edge-computing-for-a-sustainable-future/)
 
@@ -53,10 +53,10 @@ If you're interested in the sustainability aspect, see also: [Why Edge Computing
 
 Of course, while we see a market shift towards Edge Computing, there is no Edge Computing vs. Cloud Computing - the two complement each other and the question is mainly: How much edge does your use case need?
 
-<img src="/dev-how-to/img/edge-ai/cloud-to-edge-continuum.png" alt="Edge AI drivers (benefits)" />
+<img src="/img/edge-ai/cloud-to-edge-continuum.png" alt="Edge AI drivers (benefits)" />
 
 Every shift in computing is empowered by core technologies
-<img src="/dev-how-to/img/edge-ai/computing-shifts-empowered-by-core-tech.png" alt="Every shift in computing is empowered by core technologies" />
+<img src="/img/edge-ai/computing-shifts-empowered-by-core-tech.png" alt="Every shift in computing is empowered by core technologies" />
 
 ## What are the core technologies empowering Edge AI?
 
@@ -67,7 +67,7 @@ Typically, Mobile AI apps need **three core components**:
 2. A [**vector database**](https://objectbox.io/vector-database/)
 3. **Data sync** for hybrid architectures ([Data Sync Alternatives](https://objectbox.io/data-sync-alternatives-offline-vs-online-solutions/))
 
-<img src="/dev-how-to/img/edge-ai/core-tech-enabling-edge-ai.png" alt="The core technologies empowering Edge AI" />
+<img src="/img/edge-ai/core-tech-enabling-edge-ai.png" alt="The core technologies empowering Edge AI" />
 
 
 ## A look at AI models
@@ -76,7 +76,7 @@ Typically, Mobile AI apps need **three core components**:
 
 Large foundation models (LLMs) remain costly and centralized. In contrast, **Small Language Models (SLMs)** bring similar capabilities in a lightweight, resource-efficient way.
 
-<img src="/dev-how-to/img/edge-ai/slm-quality-cost.png" alt="SLM quality and cost comparison" />
+<img src="/img/edge-ai/slm-quality-cost.png" alt="SLM quality and cost comparison" />
 - Up to **100x cheaper** to run
 - Faster, with lower energy consumption
 - Near-Large-Model quality in some cases
@@ -84,7 +84,7 @@ Large foundation models (LLMs) remain costly and centralized. In contrast, **Sma
 This makes them ideal for **local AI** scenarios: assistants, semantic search, or multimodal apps running directly on-device. However....
 
 ### Frontier AI Models are still getting bigger and costs are skyrocketing
-<img src="/dev-how-to/img/edge-ai/llm-costs-still-skyrocketing.png" alt="SLM quality and cost comparison" />
+<img src="/img/edge-ai/llm-costs-still-skyrocketing.png" alt="SLM quality and cost comparison" />
 
 ### Why this matters for developers: Monetary and hidden costs of using Cloud AI
 
@@ -99,10 +99,10 @@ Running cloud AI comes at a cost:
 ### What about Open Source AI Models?
 
 Yes, they are an option, but be mindful of potential risks and caveats. Be aware that you also pay to be free of liability risks.
-<img src="/dev-how-to/img/edge-ai/opensource-ai-models.png" alt="SLM quality and cost comparison" />
+<img src="/img/edge-ai/opensource-ai-models.png" alt="SLM quality and cost comparison" />
 
 ### While SLMs are all the rage, it's really about specialised AI models in Edge AI (at this moment...)
-<img src="/dev-how-to/img/edge-ai/for-mobile-it-is-specialized-models-not-SLM.png" alt="SLM quality and cost comparison" />
+<img src="/img/edge-ai/for-mobile-it-is-specialized-models-not-SLM.png" alt="SLM quality and cost comparison" />
 
 
 ## On-device Vector Databases are the second essential piece of the Edge AI Tech Stack
@@ -118,7 +118,7 @@ Edge Vector databases, or on-device vector databases, are still rare. Some serve
 :::
 
 
-<img src="/dev-how-to/img/edge-ai/vector-database.png" alt="Vector Databases" />
+<img src="/img/edge-ai/vector-database.png" alt="Vector Databases" />
 
 
 ## Developer Story: On-device AI Screenshot Searcher Example App
@@ -133,19 +133,19 @@ To test the waters, I built a [**Screenshot Searcher** app with ObjectBox Vector
 This was easy and took less than a day. However, I learned more with the stuff I tried that wasn't easy... ;) 
 
 ### What I learned about text classification (and hopefully helps you)
-<img src="/dev-how-to/img/edge-ai/on-device-text-classification.png" alt="On-device Text Classification Learnings" />
+<img src="/img/edge-ai/on-device-text-classification.png" alt="On-device Text Classification Learnings" />
 
 --> See Finetuning.... without Finetuning, no model, no text classification.
 
 ### What I learned about finetuning (and hopefully helps you)
-<img src="/dev-how-to/img/edge-ai/finetuning-text-model-learnings.png" alt="Finetuning Learnings (exemplary, based on finetuning DBpedia)" />
+<img src="/img/edge-ai/finetuning-text-model-learnings.png" alt="Finetuning Learnings (exemplary, based on finetuning DBpedia)" />
 
 --> Finetuning failed --> I will try again ;)
 
 ### What I learned about integrating an SLM (Google's Gemma)
 
 Integrating Gemma was super straightforward; it worked on-device in less than an hour (just don't try to use the Android emulator (AVD) - it's not recommended to try and run Gemma on the AVD, and it also did not work for me).
-<img src="/dev-how-to/img/edge-ai/using-gemma-on-android.png" alt="Using Gemma on Android" />
+<img src="/img/edge-ai/using-gemma-on-android.png" alt="Using Gemma on Android" />
 
 
 In this example app, we are using Gemma to enhance the screenshot search with an additional AI layer:
@@ -161,7 +161,7 @@ It's already fairly easy - and vibe coding an Edge AI app very doable. While of 
 
 
 
-<img src="/dev-how-to/img/edge-ai/final-tech-stack.png" alt="Final Tech Stack" />
+<img src="/img/edge-ai/final-tech-stack.png" alt="Final Tech Stack" />
 
 
 
@@ -198,6 +198,6 @@ We’re at an inflection point: AI is moving from centralized, cloud-based servi
 
 The future of AI is not just big — it's also **small, local, and synced**.
 
-<img src="/dev-how-to/img/edge-ai/ai-anytime-anywhere.png" alt="AI Anytime Anywhere Future" />
+<img src="/img/edge-ai/ai-anytime-anywhere.png" alt="AI Anytime Anywhere Future" />
 
 ---

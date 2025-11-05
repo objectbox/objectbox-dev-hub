@@ -18,6 +18,7 @@ const sidebars: SidebarsConfig = {
         'box-put-method',
         'box-remove-method',
         'transactions',
+        'data-sync-cpp-getting-started',
       ],
     },
     {

@@ -47,7 +47,7 @@ const config: Config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.ts'),
-          editUrl: 'https://github.com/objectbox/objectbox-dev-site/edit/main/docs/',
+          editUrl: 'https://github.com/objectbox/objectbox-dev-site/edit/main/',
 
         },
         blog: false,

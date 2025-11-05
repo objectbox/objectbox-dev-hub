@@ -1,0 +1,130 @@
+---
+id: data-sync-cpp-getting-started
+title: "Get Started with Syncing Data in C++"
+sidebar_label: "Data Sync C++"
+description: "Learn how to use ObjectBox Sync in a C++ app: get the sync library, mark entities for sync, and connect to a server."
+slug: /data-sync/cpp-getting-started
+keywords: [ObjectBox, Data Sync, C++, sync client, offline-first, data synchronization]
+image: /img/social/data-sync-cpp-getting-started.jpg
+author: Dr. Vivien Dollinger
+author_url: https://www.linkedin.com/in/vivien-dollinger/
+---
+
+# Get Started with Syncing Data in C++  <!-- ObjectBox Sync overview: https://sync.objectbox.io/sync-client -->
+This guide shows how to use ObjectBox **Sync** in a C++ app (get the sync library, mark entities for sync, connect to a server). <!-- Overview + minimal setup incl. C++: https://sync.objectbox.io/sync-client -->
+
+## 1) Get ObjectBox Sync  <!-- Install docs, CMake linking, sync variant: https://cpp.objectbox.io/installation/ -->
+To use Sync you must link your app against the **`objectbox-sync`** library (instead of `objectbox`). <!-- Installation page shows `target_link_libraries(... objectbox-sync)`: https://cpp.objectbox.io/installation/#objectbox-library -->
+
+> We’ll use the officially documented CMake **FetchContent** setup and then switch the link target to `objectbox-sync`. <!-- Recommended approach per docs: https://cpp.objectbox.io/installation/#objectbox-library -->
+
+### CMakeLists.txt  <!-- CMake + FetchContent: https://cpp.objectbox.io/installation/#objectbox-library -->
+```cmake
+cmake_minimum_required(VERSION 3.14)  # per docs 3.14+ example  <!-- https://cpp.objectbox.io/installation/#objectbox-library -->
+project(myapp)                        # example name             <!-- https://cpp.objectbox.io/installation/#objectbox-library -->
+set(CMAKE_CXX_STANDARD 11)            # C++11 or higher          <!-- https://cpp.objectbox.io/installation/#objectbox-library -->
+
+include(FetchContent)                 # use FetchContent         <!-- https://cpp.objectbox.io/installation/#objectbox-library -->
+FetchContent_Declare(                 # declare OBX dependency   <!-- https://cpp.objectbox.io/installation/#objectbox-library -->
+  objectbox
+  GIT_REPOSITORY https://github.com/objectbox/objectbox-c.git  # official repo  <!-- https://cpp.objectbox.io/installation/#objectbox-library -->
+  GIT_TAG        v4.1.0                                        # example tag    <!-- https://cpp.objectbox.io/installation/#objectbox-library -->
+)
+FetchContent_MakeAvailable(objectbox) # fetch headers & libs     <!-- https://cpp.objectbox.io/installation/#objectbox-library -->
+
+add_executable(myapp src/main.cpp)    # your target              <!-- https://cpp.objectbox.io/installation/#objectbox-library -->
+
+# Link against the Sync variant instead of the core library:
+target_link_libraries(myapp PRIVATE objectbox-sync)             # sync-enabled  <!-- https://cpp.objectbox.io/installation/#objectbox-library -->
+```
+
+By linking **`objectbox-sync`**, the Sync client API (from `objectbox-sync.hpp`) is available to your app. <!-- Sync C++ API reference header & classes: https://objectbox.io/docfiles/c/current/objectbox-sync_8hpp.html -->
+
+## 2) Define Your Data Model for Sync  <!-- Entity annotations: https://cpp.objectbox.io/entity-annotations/ -->
+Enable sync per entity by adding an ObjectBox annotation comment to your FlatBuffers schema (`.fbs`). <!-- Annotation mechanism (comments): https://cpp.objectbox.io/entity-annotations/ -->
+
+Use `/// objectbox: sync` immediately before the `table` you want to sync. <!-- Sync annotation: https://cpp.objectbox.io/entity-annotations/#supported-annotations -->
+
+### `schema.fbs`  <!-- Annotated schema example shows `objectbox:sync`: https://cpp.objectbox.io/entity-annotations/#annotated-schema-example -->
+```fbs
+/// objectbox: sync                     // enable sync for this entity  <!-- https://cpp.objectbox.io/entity-annotations/#supported-annotations -->
+table Task {                            // FlatBuffers table = OBX entity <!-- https://cpp.objectbox.io/entity-annotations/ -->
+  id: ulong (id);                       // ObjectBox ID annotation       <!-- https://cpp.objectbox.io/entity-annotations/#supported-annotations -->
+  text: string;                         // regular property              <!-- https://cpp.objectbox.io/entity-annotations/ -->
+  date_created: ulong (date);           // timestamp (ms since epoch)    <!-- https://cpp.objectbox.io/entity-annotations/#supported-annotations -->
+}
+```
+
+> Note: `root_type` is a general FlatBuffers concept and **not required by ObjectBox**; you can omit it here. <!-- FlatBuffers schema docs (root_type is generic, not needed by OBX): https://flatbuffers.dev/schema/ -->
+
+After editing the schema, run the **ObjectBox Generator** again so the `.obx.hpp/.obx.cpp` and `objectbox-model.json` are updated with the sync flag. <!-- Generator outputs incl. objectbox-model.json: https://cpp.objectbox.io/generator/ -->
+
+## 3) Start the Sync Client  <!-- Sync client start (C++ snippet): https://sync.objectbox.io/sync-client -->
+Create your `Store`, create a `SyncClient` for it, and `start()` the client. <!-- Minimal C++ example + start(): https://sync.objectbox.io/sync-client -->
+
+### `main.cpp`  <!-- Core/Sync headers, Options/Store, Sync client: official C++ API pages -->
+```cpp
+#include "objectbox.hpp"           // core C++ API                <!-- C++ header ref: https://objectbox.io/docfiles/c/current/objectbox_8hpp.html -->
+#include "objectbox-sync.hpp"      // sync API & classes          <!-- Sync header ref: https://objectbox.io/docfiles/c/current/objectbox-sync_8hpp.html -->
+#include "schema.obx.hpp"          // generated model code        <!-- Generator outputs: https://cpp.objectbox.io/generator/ -->
+
+int main() {
+    // Build Store with the generated model:
+    obx::Options opt;                                     // Options API         <!-- Options class: https://objectbox.io/docfiles/c/current/classobx_1_1Options.html -->
+    opt.model(create_obx_model());                        // set model on Options<!-- Options::model(...): https://objectbox.io/docfiles/c/current/classobx_1_1Options.html -->
+    obx::Store store(opt);                                // open Store          <!-- Store class: https://objectbox.io/docfiles/c/current/classobx_1_1Store.html -->
+
+    // Server URL: use ws:// for unencrypted, wss:// for TLS.
+    // Using localhost (same machine):
+    std::string server_url = "ws://127.0.0.1:9999";       // example endpoint    <!-- Sync client docs use ws://127.0.0.1:9999: https://sync.objectbox.io/sync-client -->
+
+    // If using the Android Emulator, 10.0.2.2 reaches the host machine:
+    // std::string server_url = "ws://10.0.2.2:9999";      // emulator host map   <!-- Mentioned in Sync docs with link to Android docs: https://sync.objectbox.io/sync-client#start-the-sync-client (see "Using Android emulator?" note) -->
+
+    // Create the Sync client (keep it in a shared_ptr as advised by the API docs):
+    std::shared_ptr<obx::SyncClient> syncClient = obx::Sync::client( // builder   <!-- C++ minimal example: https://sync.objectbox.io/sync-client#start-the-sync-client -->
+        store,                                                      // Store      <!-- Same as above -->
+        server_url,                                                 // URL        <!-- Same as above -->
+        obx::SyncCredentials::none()                                // creds      <!-- Credentials factory methods incl. none(): https://objectbox.io/docfiles/c/current/classobx_1_1SyncCredentials-members.html -->
+    );                                                              // shared_ptr<!-- SyncClient API is in objectbox-sync.hpp: https://objectbox.io/docfiles/c/current/classobx_1_1SyncClient.html -->
+
+    // Start background syncing:
+    syncClient->start();                                            // non-blocking<!-- start(): background + reconnect behavior described: https://sync.objectbox.io/sync-client -->
+
+    // Your normal ObjectBox usage continues, synced entities will propagate:
+    obx::Box<Task> box(store);                                      // Box API     <!-- Box<> class: https://objectbox.io/docfiles/c/current/classobx_1_1Box.html -->
+    box.put({0, "My first C++ task", 1730716800000});               // put object  <!-- Box operations documented in C++ API: https://objectbox.io/docfiles/c/current/classobx_1_1Box.html -->
+
+    // Keep the app running while syncing (start() is async). Also, close sync before closing the Store:
+    // The sync client runs asynchronously, auto-reconnects; always stop/close it before closing Store.
+    // Guidance covered in Sync docs ("All of this happens asynchronously" + "Always close the client before closing the store."):
+    // https://sync.objectbox.io/sync-client
+    std::cout << "Press ENTER to exit.\n";
+    std::cin.get();
+
+    syncClient->stop();                                             // stop client <!-- stop/close lifecycle on SyncClient: https://objectbox.io/docfiles/c/current/classobx_1_1SyncClient.html -->
+    return 0;
+}
+```
+
+**Production note:** instead of `none()`, use real credentials such as `sharedSecret(...)` or JWT as recommended. <!-- Credentials options + JWT recommendation: https://sync.objectbox.io/sync-server/configuration and https://objectbox.io/docfiles/c/current/classobx_1_1SyncCredentials-members.html -->
+
+## 4) Connect to the Sync Server  <!-- Sync Server docs: https://sync.objectbox.io/sync-server -->
+Run the **Sync Server** configured with the same model you generated (point it at your `objectbox-model.json`). <!-- Model file option (CLI `-m/--model` and JSON `modelFile`): https://sync.objectbox.io/sync-server/configuration -->
+
+### Example (Linux/macOS)  <!-- CLI options incl. --model & --unsecured-no-authentication: https://sync.objectbox.io/sync-server/configuration -->
+```bash
+# Bind locally on port 9999 & load your model JSON:
+sync-server --bind=ws://127.0.0.1:9999 \                # bind address/port   <!-- bind option doc: https://sync.objectbox.io/sync-server/configuration -->
+            --model=path/to/build/objectbox-model.json \ # model file (JSON)   <!-- --model/-m and JSON modelFile: https://sync.objectbox.io/sync-server/configuration -->
+            --unsecured-no-authentication                # dev-only, no auth   <!-- dev option documented (not for production): https://sync.objectbox.io/sync-server/configuration -->
+```
+
+You should see log output from the server on startup and when clients connect. <!-- Server CLI help & logging examples on the configuration page: https://sync.objectbox.io/sync-server/configuration -->
+
+> For long-term setups, prefer a JSON config file (`sync-server-config.json`) and use proper authentication (JWT recommended). <!-- Config file & auth guidance: https://sync.objectbox.io/sync-server/configuration -->
+
+## Next Steps  <!-- Further reading / features -->
+- Try the **Sync Client** page for more options (listeners, request update modes, filter variables). <!-- Event listeners & options: https://sync.objectbox.io/sync-client -->
+- Use **credentials** like `SyncCredentials::sharedSecret(...)` or **JWT tokens** for production. <!-- Credentials list: https://objectbox.io/docfiles/c/current/classobx_1_1SyncCredentials-members.html ; JWT production note: https://sync.objectbox.io/sync-server/configuration -->
+- Review **entity relations & constraints** for sync: only relations between either all-synced or all-non-synced entities. <!-- Relationship rule: https://sync.objectbox.io/sync-client (section around annotations & relations) -->

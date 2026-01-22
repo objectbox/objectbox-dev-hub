@@ -28,6 +28,11 @@ const sidebars: SidebarsConfig = {
         'realm-to-objectbox-migration',
         'realm-to-objectbox-api-mapping',
         'technical-realm-vs-object-box-audit',
+        {
+          type: 'doc',
+          id: 'mongodb-atlas-objectbox-sync-quickstart-production-notes',
+          label: 'MongoDB Data Sync tutorial',
+        },
       ],
     },
     {

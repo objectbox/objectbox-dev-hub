@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'ObjectBox for Embedded AI, Mobile AI, Edge AI & Offline-First Apps',
-  tagline: 'Dev-TidBits around Edge AI, Databases, Data Sync',
+  tagline: 'Dev TidBits and How-tos around Edge AI, Data Sync, and ObjectBox',
   favicon: 'img/favicon.ico',
 
   url: ' https://objectbox.io',
@@ -71,7 +71,7 @@ const config: Config = {
   themeConfig: {
     image: 'img/objectbox-social-card.jpg',
     navbar: {
-      title: 'Dev TidBits and How-tos around Edge AI, Databases, Data Sync',
+      title: 'Dev TidBits and How-tos around Edge AI, Data Sync, and ObjectBox',
       logo: {
         alt: 'ObjectBox Logo',
         src: 'img/objectbox-logo-rect.jpg',

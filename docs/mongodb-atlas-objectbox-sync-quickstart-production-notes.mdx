@@ -1,0 +1,92 @@
+---
+title: MongoDB Atlas + ObjectBox Sync: Quickstart + production notes
+description: Companion guide from ObjectBox: quick navigation, production caveats, and key docs for syncing ObjectBox clients with MongoDB Atlas.
+slug: /dev-how-tos/mongodb-atlas-objectbox-sync-quickstart-production-notes
+---
+
+import Link from '@docusaurus/Link';
+
+# MongoDB Atlas + ObjectBox Sync: Quickstart + production notes
+
+**TL;DR:** Use **ObjectBox on the device** for offline-first performance, run **ObjectBox Sync Server** as the sync engine, and connect it to **MongoDB Atlas** via the **MongoDB Sync Connector**.
+
+## What this page is (and isn’t)
+
+- This is a **companion guide** from ObjectBox: quick navigation, production caveats, and troubleshooting pointers.
+- The full end-to-end walkthrough is **MongoDB-authored** (by Fidaa B.):
+
+https://dev.to/mongodb/mongodb-data-sync-for-offline-first-apps-keep-data-in-sync-with-objectbox-and-mongodb-atlas-34k8
+
+## Architecture at a glance
+
+**MongoDB Atlas ⇄ ObjectBox Sync Server ⇄ ObjectBox (mobile/edge clients)**
+
+- Clients keep working offline using the local ObjectBox database.
+- The Sync Server coordinates changes and syncs bidirectionally with MongoDB via the connector.
+
+## Quickstart (fast route)
+
+### 1) Start with the MongoDB tutorial
+
+Follow the end-to-end demo against a MongoDB Atlas cluster:
+
+https://dev.to/mongodb/mongodb-data-sync-for-offline-first-apps-keep-data-in-sync-with-objectbox-and-mongodb-atlas-34k8
+
+### 2) Keep these ObjectBox references open
+
+- MongoDB Sync Connector overview: https://sync.objectbox.io/mongodb-sync-connector
+- Connector setup: https://sync.objectbox.io/mongodb-sync-connector/objectbox-sync-connector-setup
+- Sync Server configuration: https://sync.objectbox.io/sync-server/configuration
+- ObjectBox Sync docs (start here): https://sync.objectbox.io/
+
+## Production notes (the stuff that bites later)
+
+### MongoDB connection & “primary DB” discipline
+
+- The connector needs a MongoDB connection string and a **primary MongoDB database name**.
+- After a full sync in a given environment, avoid switching the primary database unless you plan a reset/re-sync (especially during development).
+
+### Prefer config files for non-trivial setups
+
+For anything beyond basic settings, use a configuration file approach (repeatable, reviewable, and easier to automate).
+
+### Offline reality: plan for long gaps
+
+Assume devices can be offline for days/weeks. Document your approach to:
+
+- conflict strategy
+- schema evolution/migrations
+- monitoring / backlog visibility
+
+### Security & access
+
+Treat Sync Server as production infrastructure:
+
+- restrict admin endpoints
+- define required client auth methods
+- keep secrets in runtime config (not baked into images)
+
+## FAQ (starter set)
+
+### How does bidirectional sync work here?
+
+Changes flow between ObjectBox clients and MongoDB in both directions via the Sync Server + connector.
+
+### Where do I configure MongoDB URL / DB name?
+
+Either via CLI parameters (e.g. `--mongo-url`, `--mongo-db`) or in the Sync Server configuration file.
+
+### What should I monitor in production?
+
+At minimum: sync backlog/latency, connector logs, server resource usage, and error/retry rates.
+
+## Next steps
+
+- MongoDB tutorial (MongoDB-authored):  
+  https://dev.to/mongodb/mongodb-data-sync-for-offline-first-apps-keep-data-in-sync-with-objectbox-and-mongodb-atlas-34k8
+- Connector docs: https://sync.objectbox.io/mongodb-sync-connector
+- Configuration docs: https://sync.objectbox.io/sync-server/configuration
+
+---
+
+**Related docs:** If you want to start from ObjectBox Sync first, begin here: <Link to="https://sync.objectbox.io/">sync.objectbox.io</Link>
